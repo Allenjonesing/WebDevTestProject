@@ -42,6 +42,8 @@
 
         <!-- The button that triggers the Modal -->
         <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">Open Modal</button>
+        <!-- The button that triggers the Modal 2 -->
+        <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal2">Open Modal</button>
         <!-- Bootstrap Modal -->
         <div id="myModal" class="modal fade" role="dialog">
             <div class="modal-dialog">
@@ -100,6 +102,76 @@
             </div>
         </div>
         <!-- END Bootstrap Modal -->
+        <!--Another Modal-->
+        <div id="myModal2" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Register a Username and Password</h4>
+                    </div>
+                    <div class="modal-body">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <input type="text" id="userNameTextBox" placeholder="Username" />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <span id="userNamSpan"></span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <input type="text" id="passwordTextBox" placeholder="Password" />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <span id="passwordSpan"></span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <input type="text" id="passwordRptTextBox" placeholder="Repeat Password" />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <span id="passwordRptSpan"></span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <input type="button" id="submitButton" value="Login" />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <span id="messageSpan"></span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <img id="loadingImg" src="loading.gif" />
+                                        
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+                <!-- END Modal content-->
+            </div>
+        </div>
+        <!-- END Bootstrap Modal -->
+
     </div>
 
 
@@ -131,8 +203,12 @@
                 $("#passwordSpan").text("Enter Password");
             else
                 $("#passwordSpan").text("");
-            if (($("#userNameTextBox").val() != "") && ($("#passwordTextBox").val() != ""))
-                $.ajax({
+            if (($("#userNameTextBox").val() != "") && ($("#passwordTextBox").val() != "")) {
+                $("#loadingImg").show();
+                setTimeout(goToProfile, 3000);
+                
+            }
+                /*$.ajax({
                     type: "POST",
                     url: "index.aspx/login",
                     contentType: "application/json; charset=utf-8",
@@ -149,8 +225,12 @@
                     error: function (xhr, status, error) {
                         $("#dbData").html("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
                     }
-                });
+                });*/
         });
+        function goToProfile() {
+            window.location.href = "profile.html";
+            $("#loadingImg").hide();
+        }
         $(document).ajaxStart(function () {
             $("#loadingImg").show();
         });
