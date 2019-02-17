@@ -2,98 +2,110 @@
 
 <html>
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset = utf-8" />
-	<script type="text/javascript">
+    <script src="Resources/ckeditor_4.11.2_basic/ckeditor.js"></script>
 
-         //prefixes of implementation that we want to test
-         window.indexedDB = window.indexedDB || window.mozIndexedDB ||
-         window.webkitIndexedDB || window.msIndexedDB;
+    <meta http-equiv="Content-Type" content="text/html; charset = utf-8" />
+    
+    
+    
+    <script type="text/javascript">
 
-         //prefixes of window.IDB objects
-         window.IDBTransaction = window.IDBTransaction ||
-         window.webkitIDBTransaction || window.msIDBTransaction;
-         window.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange ||
-         window.msIDBKeyRange
+        //prefixes of implementation that we want to test
+        window.indexedDB = window.indexedDB || window.mozIndexedDB ||
+            window.webkitIndexedDB || window.msIndexedDB;
 
-         if (!window.indexedDB) {
-            window.alert("Your browser doesn't support a stable version of IndexedDB.")
-         }
+        //prefixes of window.IDB objects
+        window.IDBTransaction = window.IDBTransaction ||
+            window.webkitIDBTransaction || window.msIDBTransaction;
+        window.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange ||
+            window.msIDBKeyRange
 
-         var employeeData = [];
-         var db;
-         var request = window.indexedDB.open("newDatabase", 1);
+        if (!window.indexedDB) {
+            window.console.log("Your browser doesn't support a stable version of IndexedDB.")
+        }
 
-         request.onerror = function(event) {
+        if (document.cookie == "")
+            document.cookie = 0;
+        var employeeData = [];
+        var db;
+        var request = window.indexedDB.open("newDatabase", 1);
+        employeeData.size = document.cookie;
+        console.log(document.cookie)
+
+        request.onerror = function (event) {
             console.log("error: " + request.error);
-         };
+        };
 
-         request.onsuccess = function(event) {
+        request.onsuccess = function (event) {
             db = request.result;
-            console.log("success: "+ db);
-         };
+            console.log("success: " + db);
+        };
 
         request.onupgradeneeded = function (event) {
             console.log("Upgrading... ");
 
             var db = event.target.result;
-            var objectStore = db.createObjectStore("employee", {keyPath: "id"});
+            var objectStore = db.createObjectStore("employee", { keyPath: "id", autoIncrement: true });
 
             for (var i in employeeData) {
-               objectStore.add(employeeData[i]);
+                objectStore.add(employeeData[i]);
             }
-         }
+        }
 
-         function read() {
+
+
+        function read() {
             var transaction = db.transaction(["employee"]);
             var objectStore = transaction.objectStore("employee");
-            var request = objectStore.get((employeeData.length-1).toString());
+            var request = objectStore.get((employeeData.size - 1).toString());
 
-            request.onerror = function(event) {
-               alert("Unable to retrieve data from database!");
+            request.onerror = function (event) {
+                console.log("Unable to retrieve data from database!");
             };
 
-            request.onsuccess = function(event) {
-               // Do something with the request.result!
-               if(request.result) {
-                  alert("Name: " + request.result.name + 
-                    " Age: " + request.result.age + "Email: " + request.result.email);
-               } else {
-                  alert("Kenny couldn't be found in your database!");
-               }
+            request.onsuccess = function (event) {
+                // Do something with the request.result!
+                console.log("Current length of database: " + employeeData.size);
+                if (request.result) {
+                    console.log("Name: " + request.result.name +
+                        " Age: " + request.result.age + "Email: " + request.result.email);
+                } else {
+                    console.log("Kenny couldn't be found in your database!");
+                }
             };
-         }
+        }
 
-         function readAll() {
+        function readAll() {
             var objectStore = db.transaction("employee").objectStore("employee");
 
-            objectStore.openCursor().onsuccess = function(event) {
-               var cursor = event.target.result;
+            objectStore.openCursor().onsuccess = function (event) {
+                var cursor = event.target.result;
 
-               if (cursor) {
-                  alert("Name for id " + cursor.key + " is " + cursor.value.name,
-                     "Age: " + cursor.value.age + "Email: " + cursor.value.email);
-                  cursor.continue();
-               } else {
-                  alert("No more entries!");
-               }
+                if (cursor) {
+                    console.log("Name for id " + cursor.key + " is " + cursor.value.name,
+                        "Age: " + cursor.value.age + "Email: " + cursor.value.email);
+                    cursor.continue();
+                } else {
+                    console.log("No more entries!");
+                }
             };
-         }
+        }
 
-        function add() {
+        function add(userName, msgString, date) {
             // Create a new object ready to insert into the IDB
-            alert(employeeData.length);
-            var newItem = [{ id: employeeData.length.toString(), name: "Kenny", age: 19, email: "kenny@planet.org" }];
+            console.log(employeeData.size);
+            var newItem = [{id: employeeData.size, userName: userName, msgString: msgString, date: date}];
 
             // open a read/write db transaction, ready for adding the data
             var transaction = db.transaction(["employee"], "readwrite");
 
             // report on the success of the transaction completing, when everything is done
             transaction.onsuccess = function (event) {
-                alert("Transaction Complete!");
+                console.log("Transaction Complete!");
             };
 
             transaction.onerror = function (event) {
-                alert("Error, Not opened: " + transaction.error + " -> newItem id: " + newItem[0].id + " -> database length: " + employeeData.length);
+                console.log("Error, Not opened: " + transaction.error + " -> newItem id: " + newItem[0].id + " -> database size: " + employeeData.size);
             };
 
             // create an object store on the transaction
@@ -104,60 +116,166 @@
 
             objectStoreRequest.onsuccess = function (event) {
                 // report the success of our request
-                alert("Item added. -> newItem id: " + newItem[0].id + " -> database length: " + employeeData.length);
-                employeeData.length++;
-                /*var request = db.transaction(["employee"], "readwrite")
-            .objectStore("employee")
-            .add({ id: "00-10", name: "Kenny", age: 19, email: "kenny@planet.org" });
-
-            request.onsuccess = function(event) {
-                alert("Kenny has been added to your database.");
-                */
+                console.log("Item added. -> newItem id: " + newItem[0].id + " -> database size: " + employeeData.size);
+                employeeData.size++;
+                //var getActive = browser.tabs.query({ active: true, currentWindow: true });
+                //getActive.then(setCookie);
+                document.cookie = employeeData.size.toString();
+                
+                
             };
             objectStoreRequest.onerror = function (event) {
                 // report the error of our request
-                alert("Item Not Added. Error: " + objectStoreRequest.error + " -> newItem id: " + newItem[0].id + " -> database length: " + employeeData.length);
+                console.log("Item Not Added. Error: " + objectStoreRequest.error + " -> newItem id: " + newItem[0].id + " -> database size: " + employeeData.size);
 
             };
 
 
-            request.onerror = function(event) {
-                alert("error: " + request.error + " -> newItem id: " + newItem.id + " -> database length: " + employeeData.length);
+            request.onerror = function (event) {
+                console.log("error: " + request.error + " -> newItem id: " + newItem.id + " -> database size: " + employeeData.size);
             }
-         }
+        }
 
-         function remove() {
-            var request = db.transaction(["employee"], "readwrite")
-            .objectStore("employee")
-            .delete((employeeData.length-1).toString());
-             employeeData.length--;
-             request.onsuccess = function (event) {
-                 alert("last entry has been removed from your database.");
-             };
+        function getCookie(tabs) {
+            var getting = browser.cookies.get({
+                url: tabs[0].url,
+                name: "dbSize"
+            });
+            getting.then(logCookie);
+        }
+
+        function setCookie(tabs) {
+            browser.cookies.set({
+                url: tabs[0].url,
+                name: "dbSize",
+                value: employeeData.size
+            });
+        }
+
+        function remove() {
+            if (employeeData.size > 0) {
+                var request = db.transaction(["employee"], "readwrite")
+                    .objectStore("employee")
+                    .delete((employeeData.size - 1).toString());
+                request.onsuccess = function (event) {
+                    console.log("last entry has been removed from your database.");
+                    employeeData.size--;
+                };
+                request.onerror = function (event) {
+                    console.log("error: " + request.error);
+                };
+
+            }
+            else
+                console.log("Nothing to be removed.");
         }
 
         function clean() {
             var request = db.transaction(["employee"], "readwrite")
                 .objectStore("employee")
                 .clear();
-            employeeData.length = 0;
+            employeeData.size = 0;
             request.onsuccess = function (event) {
-                alert("all data removed from database");
+                console.log("all data removed from database");
             };
             request.onerror = function (event) {
-                alert("error: " + request.error);
+                console.log("error: " + request.error);
             };
 
         }
 
-	</script>
+        function display() {
+
+        }
+
+    </script>
 
 </head>
 <body>
+    
+    <template id=" demo">
+        <div class="row">
+            <div class="span8">
+                <div class="row">
+                    <div class="span8">
+                        <h4><strong><a href="#">Title of the post</a></strong></h4>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="span2">
+                        <a href="#" class="thumbnail">
+                            <img src="http://placehold.it/260x180" alt="">
+                        </a>
+                    </div>
+                    <div class="span6">
+                        <p>
+                            Lorem ipsum dolor sit amet, id nec conceptam conclusionemque. Et eam tation option. Utinam salutatus ex eum. Ne mea dicit tibique facilisi, ea mei omittam explicari conclusionemque, ad nobis propriae quaerendum sea.
+                        </p>
+                        <p><a class="btn" href="#">Read more</a></p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="span8">
+                        <p></p>
+                        <p>
+                            <i class="icon-user"></i> by <a href="#">John</a>
+                            | <i class="icon-calendar"></i> Sept 16th, 2012
+                            | <i class="icon-comment"></i> <a href="#">3 Comments</a>
+                            | <i class="icon-share"></i> <a href="#">39 Shares</a>
+                            | <i class="icon-tags"></i> Tags : <a href="#"><span class="label label-info">Snipp</span></a>
+                            <a href="#"><span class="label label-info">Bootstrap</span></a>
+                            <a href="#"><span class="label label-info">UI</span></a>
+                            <a href="#"><span class="label label-info">growth</span></a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <hr>
+    </template>
+    <form>
+        <textarea name="editor1" id="editor1" rows="10" cols="80">
+                This is my textarea to be replaced with CKEditor.
+            </textarea>
+        <script>
+            // Replace the <textarea id="editor1"> with a CKEditor
+            // instance, using default configuration.
+            CKEDITOR.replace('editor1');
+
+            function post() {
+                const editorData = CKEDITOR.instances.editor1.getData();
+                console.log(editorData);
+                add("username", editorData, "fake")
+               
+
+            }
+
+            function showContent() {
+                var temp, item, a, i;
+                // Get the template element:
+                temp = document.getElementsByTagName("template")[0];
+                // Get the DIV element from the template:
+                item = temp.content.querySelector("div");
+                // For each item in the array:
+                for (i = 0; i < employeeData.size; i++) {
+                    // Create a new node, based on the template:
+                    a = document.importNode(item, true);
+                    // Add data from the array:
+                    a.textContent += employeeData[i];
+                    // Append the new node wherever you like:
+                    document.body.appendChild(a);
+                }
+            }
+
+        </script>
+    </form>
+
+    <button onclick="showContent()">Post </button>
     <button onclick="read()">Read </button>
     <button onclick="readAll()">Read all </button>
-    <button onclick="add()">Add data </button>
+    <button onclick="post()">Add data </button>
     <button onclick="remove()">Delete data </button>
     <button onclick="clean()">Clear ALL data </button>
+
 </body>
 </html>

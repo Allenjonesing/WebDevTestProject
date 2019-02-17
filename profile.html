@@ -1,4 +1,4 @@
-<html lang="en">
+﻿<html lang="en">
 <head>
 	<meta charset="utf-8">
 	<title>Welcome to your profile page</title>
@@ -6,6 +6,8 @@
 	<script src="Resources/ckeditor_4.11.2_basic/ckeditor.js"></script>
 </head>
 <body>
+	<button onclick="post()">Post </button>
+
 	<form>
 		<textarea name="editor1" id="editor1" rows="10" cols="80">
                 This is my textarea to be replaced with CKEditor.
@@ -13,17 +15,24 @@
 		<script>
                 // Replace the <textarea id="editor1"> with a CKEditor
                 // instance, using default configuration.
-                CKEDITOR.replace( 'editor1' );
-		</script>
+            CKEDITOR.replace('editor1');
+            
+            function post() {
+                const editorData = CKEDITOR.instances.editor1.getData();
+                console.log(editorData);
+            }		
+        </script>
 	</form>
 
-	<input type="button" id="postbutton" value="Post" />
 
 	<script type="text/javascript">
-	$("#submitButton").click(function (e) {
-		const editorData = editor.getData();
 
-	}
+
+	/*$("#postbutton").click(function (e) {
+		const editorData = editor.getData();
+		console.log(editorData);
+	});*/
+
 	</script>
 </body>
 </html>
