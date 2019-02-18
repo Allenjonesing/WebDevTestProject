@@ -78,7 +78,7 @@
                                 </tr>
                                 <tr>
                                     <td>
-                                        <input type="button" id="submitButton" value="Login" />
+                                        <input type="button" id="loginButton" value="Login" />
                                     </td>
                                 </tr>
                                 <tr>
@@ -116,42 +116,42 @@
                             <tbody>
                                 <tr>
                                     <td>
-                                        <input type="text" id="userNameTextBox" placeholder="Username" />
+                                        <input type="text" id="regUserNameTextBox" placeholder="Username" />
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>
-                                        <span id="userNamSpan"></span>
+                                        <span id="regUserNamSpan"></span>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>
-                                        <input type="text" id="passwordTextBox" placeholder="Password" />
+                                        <input type="text" id="regPasswordTextBox" placeholder="Password" />
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>
-                                        <span id="passwordSpan"></span>
+                                        <span id="regPasswordSpan"></span>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>
-                                        <input type="text" id="passwordRptTextBox" placeholder="Repeat Password" />
+                                        <input type="text" id="regRptPasswordTextBox" placeholder="Repeat Password" />
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>
-                                        <span id="passwordRptSpan"></span>
+                                        <span id="regRptPasswordSpan"></span>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>
-                                        <input type="button" id="submitButton" value="Login" />
+                                        <input type="button" id="registerButton" value="Register" />
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>
-                                        <span id="messageSpan"></span>
+                                        <span id="regMessageSpan"></span>
                                     </td>
                                 </tr>
                                 <tr>
@@ -193,8 +193,172 @@
     <script src="Resources/ckeditor_4.11.2_basic/ckeditor.js"></script>
 
     <!-- Your application javascript --------------------------------------->
-    <script type="text/javascript">                         //Begin Example--------------
-        $("#submitButton").click(function (e) {
+    <script type="text/javascript">                         
+
+        //test implementation prefixes
+        window.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+
+        // window.IDB objects' prefixes
+        window.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction;
+        window.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange
+
+        //Unsupported browser
+        if (!window.indexedDB) {
+            window.console.log("Your browser doesn't support a stable version of IndexedDB.")
+        }
+
+
+        //if (document.cookie == "")
+        //    document.cookie = 0;
+        var userData = [
+           // { id: 0, username: "admin", password: "admin" }
+        ];
+
+        //database creation request
+        var data;
+        var request = window.indexedDB.open("newDatabase", 1);
+        userData.size = 0;
+        //userData.size = document.cookie;
+        //console.log(document.cookie)
+
+        //database failed
+        request.onerror = function (event) {
+            console.log("error: " + request.error);
+        };
+
+        //Database created
+        request.onsuccess = function (event) {
+            data = request.result;
+            console.log("success: " + data);
+            
+
+        };
+
+        //check for upgrades
+        request.onupgradeneeded = function (event) {
+            console.log("Upgrading... ");
+
+            //Create Object Store
+            var data = event.target.result;
+            var objectStore = data.createObjectStore("users", { keyPath: "id", autoIncrement: true });
+            //userData.size = 0;
+            //clean();
+            //Init Object Store
+            for (var i in userData) {
+                objectStore.add(userData[i]);
+                userData.size++;
+            }
+        }
+        function read() {
+            var transaction = data.transaction(["users"]);
+            var objectStore = transaction.objectStore("users");
+            var request = objectStore.get((userData.size - 1).toString());
+
+            request.onerror = function (event) {
+                console.log("Unable to retrieve data from database!");
+            };
+
+            request.onsuccess = function (event) {
+                // Do something with the request.result!
+                console.log("Current length of database: " + userData.size);
+                if (request.result) {
+                    console.log("Name: " + request.result.name +
+                        " Age: " + request.result.age + "Email: " + request.result.email);
+                } else {
+                    console.log("Kenny couldn't be found in your database!");
+                }
+            };
+        }
+        //Create new account, add user input to database
+        function register(username, password) {
+            // Create a new object ready to insert into the IDB
+            //console.log(userData.size);
+            var newUser = [{ id: userData.size, username: username, password: password }];
+
+            // open a read/write data transaction, ready for adding the data
+            var transaction = data.transaction(["users"], "readwrite");
+
+            // report on the success of the transaction completing, when everything is done
+            transaction.onsuccess = function (event) {
+                console.log("Transaction Complete!");
+            };
+
+            transaction.onerror = function (event) {
+                console.log("Error, Not opened: " + transaction.error + " -> newItem id: " + newItem[0].id + " -> database size: " + userData.size);
+            };
+
+            // create an object store on the transaction
+            var objectStore = transaction.objectStore("users");
+
+            // Make a request to add our newItem object to the object store
+            var objectStoreRequest = objectStore.add(newUser[0]);
+
+            objectStoreRequest.onsuccess = function (event) {
+                // report the success of our request
+                console.log("User added. -> newItem id: " + newUser[0].id + " -> database size: " + userData.size);
+                userData.size++;
+                //var getActive = browser.tabs.query({ active: true, currentWindow: true });
+                //getActive.then(setCookie);
+                //document.cookie = userData.size.toString();
+
+
+            };
+            objectStoreRequest.onerror = function (event) {
+                // report the error of our request
+                console.log("User Not Added. Error: " + objectStoreRequest.error + " -> newItem id: " + newUser[0].id + " -> database size: " + userData.size);
+
+            };
+
+
+            /*request.onerror = function (event) {
+                console.log("error: " + request.error + " -> newItem id: " + newUser[0].id + " -> database size: " + userData.size);
+            }*/
+        }
+
+        //Login to existing account, search database for user input
+        function login(username, password) {
+            var transaction = data.transaction(["users"]);
+            var objectStore = transaction.objectStore("users");
+            var request = objectStore.get("username");
+            request.onerror = function (event) {
+                console.log("error: " + request.error + " -> newItem id: " + newUser.id + " -> database size: " + userData.size);
+            };
+            request.onsuccess = function (event) {
+                //check username against password
+                console.log("checking username '" + username + "'.");
+                if (password == request.result.password) {
+                    //correct password, logging in....
+                    console.log("correct password, logging in....");
+                    goToProfile();
+                }
+
+            };
+        }
+
+        function clean() {
+            var request = data.transaction(["users"], "readwrite")
+                .objectStore("users")
+                .clear();
+            userData.size = 0;
+            request.onsuccess = function (event) {
+                console.log("all data removed from database");
+            };
+            request.onerror = function (event) {
+                console.log("error: " + request.error);
+            };
+
+        }
+
+
+        //create new password, edit database entry after answering security question
+        /*function forgotPass() {
+
+        }*/
+
+
+        //Begin Example--------------
+        $("#loginButton").click(function (e) {
+            console.log("login pressed");
             if ($("#userNameTextBox").val() == "")
                 $("#userNamSpan").text("Enter Username");
             else
@@ -205,9 +369,31 @@
                 $("#passwordSpan").text("");
             if (($("#userNameTextBox").val() != "") && ($("#passwordTextBox").val() != "")) {
                 $("#loadingImg").show();
-                setTimeout(goToProfile, 3000);
-                
+                //setTimeout(goToProfile, 3000);
+                login($("#userNameTextBox").val(), $("#passwordTextBox").val());
             }
+        });
+
+        $("#registerButton").click(function (e) {
+            console.log("register pressed");
+            if ($("#regUserNameTextBox").val() == "")
+                $("#regUserNamSpan").text("Enter Username");
+            else
+                $("#regUserNamSpan").text("");
+            if ($("#regPasswordTextBox").val() == "")
+                $("#regPasswordSpan").text("Enter Password");
+            else
+                $("#regPasswordSpan").text("");
+            if ($("#regRptPasswordTextBox").val() == "")
+                $("#regRptPasswordSpan").text("Retype Password");
+            else
+                $("#regRptPasswordSpan").text("");
+            if (($("#regUserNameTextBox").val() != "") && ($("#regPasswordTextBox").val() != "") && ($("#regRptPasswordTextBox").val() != "")) {
+                $("#loadingImg").show();
+                //setTimeout(goToProfile, 3000);
+                register($("#regUserNameTextBox").val(), $("#regPasswordTextBox").val());
+            }
+        });
                 /*$.ajax({
                     type: "POST",
                     url: "index.aspx/login",
@@ -226,7 +412,6 @@
                         $("#dbData").html("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
                     }
                 });*/
-        });
         function goToProfile() {
             window.location.href = "indexedDB.html";
             $("#loadingImg").hide();
@@ -236,7 +421,9 @@
         });
         $(document).ajaxStop(function () {
             $("#loadingImg").hide();
-        });    </script>
+        });    
+
+    </script>
 
 </body>
 </html>

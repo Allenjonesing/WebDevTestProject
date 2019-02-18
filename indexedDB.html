@@ -19,7 +19,7 @@
         </script>
     -->
     <script type="text/javascript">
-
+        
         //prefixes of implementation that we want to test
         window.indexedDB = window.indexedDB || window.mozIndexedDB ||
             window.webkitIndexedDB || window.msIndexedDB;
@@ -52,6 +52,8 @@
         request.onsuccess = function (event) {
             db = request.result;
             console.log("success: " + db);
+            
+
         };
 
         request.onupgradeneeded = function (event) {
@@ -66,7 +68,7 @@
         }
 
 
-
+        //clean();
         function read() {
             var transaction = db.transaction(["employee"]);
             var objectStore = transaction.objectStore("employee");
