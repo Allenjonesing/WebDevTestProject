@@ -3,11 +3,21 @@
 <html>
 <head>
     <script src="Resources/ckeditor_4.11.2_basic/ckeditor.js"></script>
+    <!-- Bootstrap requires these Libraries -->
+    <script src="Resources/jquery.3.3.1/jquery.min.js"></script>
+    <script src="Resources/bootstrap-4.1.3-dist/js/popper.min.js"></script>
 
     <meta http-equiv="Content-Type" content="text/html; charset = utf-8" />
-    
-    
-    
+    <!--
+        <script type="text/javascript">
+            $(document).ready(function () {
+                var fruitsArray = ["Apple", "Banana", "Orange", "Mango", "Pineapple"];
+                $.each(fruitsArray, function (index, value) {
+                    $("#result").append(index + ": " + value + '<br>');
+                });
+            });
+        </script>
+    -->
     <script type="text/javascript">
 
         //prefixes of implementation that we want to test
@@ -26,7 +36,10 @@
 
         if (document.cookie == "")
             document.cookie = 0;
-        var employeeData = [];
+        var employeeData = [
+            { id: 0, userName: "default name", msgString: "default msg", date: "default date" }
+        ];
+
         var db;
         var request = window.indexedDB.open("newDatabase", 1);
         employeeData.size = document.cookie;
@@ -94,7 +107,7 @@
         function add(userName, msgString, date) {
             // Create a new object ready to insert into the IDB
             console.log(employeeData.size);
-            var newItem = [{id: employeeData.size, userName: userName, msgString: msgString, date: date}];
+            var newItem = [{ id: employeeData.size, userName: userName, msgString: msgString, date: date }];
 
             // open a read/write db transaction, ready for adding the data
             var transaction = db.transaction(["employee"], "readwrite");
@@ -120,9 +133,9 @@
                 employeeData.size++;
                 //var getActive = browser.tabs.query({ active: true, currentWindow: true });
                 //getActive.then(setCookie);
-                document.cookie = employeeData.size.toString();
-                
-                
+                //document.cookie = employeeData.size.toString();
+
+
             };
             objectStoreRequest.onerror = function (event) {
                 // report the error of our request
@@ -192,13 +205,29 @@
 
 </head>
 <body>
-    
+    <div id="example"></div>
     <template id=" demo">
         <div class="row">
             <div class="span8">
                 <div class="row">
                     <div class="span8">
-                        <h4><strong><a href="#">Title of the post</a></strong></h4>
+                        <h4><strong><a href="#">
+                                        <script>
+                                            /*$('#data-table').DataTable({
+
+                                                columns: [
+                                                    { data: "employeeData.id" },
+                                                    { data: "employeeData.userName" },
+                                                    { data: "employeeData.msgString" }
+
+                                                ],
+
+                                            })*/
+                                        </script>
+    <!--<script>
+        document.getElementById("demo").innerHTML = employeeData[1].id.toString();
+    </script>-->
+</a></strong></h4>
                     </div>
                 </div>
                 <div class="row">
@@ -209,7 +238,7 @@
                     </div>
                     <div class="span6">
                         <p>
-                            Lorem ipsum dolor sit amet, id nec conceptam conclusionemque. Et eam tation option. Utinam salutatus ex eum. Ne mea dicit tibique facilisi, ea mei omittam explicari conclusionemque, ad nobis propriae quaerendum sea.
+                            
                         </p>
                         <p><a class="btn" href="#">Read more</a></p>
                     </div>
@@ -251,7 +280,51 @@
             }
 
             function showContent() {
-                var temp, item, a, i;
+                //easier method
+                for (i = 0; i < employeeData.size; i++) {
+                    var transaction = db.transaction(["employee"]);
+                    var objectStore = transaction.objectStore("employee");
+                    var request = objectStore.get(employeeData.size - 1);
+
+                    request.onerror = function (event) {
+                        console.log("Unable to retrieve data from database!");
+                    };
+
+                    request.onsuccess = function (event) {
+                        // Do something with the request.result!
+                        console.log("Current length of database: " + employeeData.size);
+                        //if (request.result) {
+                            //console.log("Name: " + request.result.name +
+                            //    " Age: " + request.result.age + "Email: " + request.result.email);
+
+                            $("#example").append(
+                                "<p> Post ID: " + request.result.id +
+                                " - UserName: " + request.result.userName +
+                                " - Message: " + request.result.msgString +
+                                " - Date: " + request.result.date +
+                                "</p>");
+                            
+                            $("#example").append("<hr />")
+                        //}
+                        //else {
+                        //    console.log("error: " + request.error);
+                        //}
+                    };
+                    request.onerror = function (event) {
+                        console.log("error: " + request.error)
+                    }
+
+                    
+                    //}
+                    document.body.append(
+                        document.importNode(
+                            document.querySelector('template').content,
+                            true)
+                        );
+                    ///renderAllTodos(todoToHtml(employeeData));
+                   
+                }
+               /* var temp, item, a, i;
                 // Get the template element:
                 temp = document.getElementsByTagName("template")[0];
                 // Get the DIV element from the template:
@@ -264,8 +337,21 @@
                     a.textContent += employeeData[i];
                     // Append the new node wherever you like:
                     document.body.appendChild(a);
-                }
+                    //javascript: history.go(0);*/
+                
             }
+            /*
+            function renderAllTodos(todos) {
+                var html = db;
+                todos.forEach(function (todo) {
+                    html += todoToHtml(todo);
+                });
+                ul.innerHTML = html;
+            }
+
+            function todoToHtml(todo) {
+                return '<li>' + todo.text + '</li>';
+            }*/
 
         </script>
     </form>
