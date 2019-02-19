@@ -1,0 +1,181 @@
+﻿<!DOCTYPE html>
+<!--Message database for Web Developer Testing Program
+    Prepared by Allen Jones 
+    Creates an indexed database to store ckeditor input as strings
+    The database entries can then be displayed as html-->
+
+<html>
+<head>
+    <script src="Resources/ckeditor_4.11.2_basic/ckeditor.js"></script>
+    <!-- Bootstrap requires these Libraries -->
+    <script src="Resources/jquery.3.3.1/jquery.min.js"></script>
+    <script src="Resources/bootstrap-4.1.3-dist/js/popper.min.js"></script>
+    
+    <meta http-equiv="Content-Type" content="text/html; charset = utf-8" />
+
+    <script type="text/javascript">
+        
+        //Test implementation prefixes
+        window.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+        window.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction;
+        window.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange
+
+        //Unsupported browser
+        if (!window.indexedDB) {
+            window.console.log("Your browser doesn't support a stable version of IndexedDB.")
+        }
+
+        //Declare database
+        var messageData = [];
+        var db;
+        var request = window.indexedDB.open("newDatabase", 1);
+
+        //Error handling
+        request.onerror = function (event) {
+            console.log("error: " + request.error);
+        };
+        request.onsuccess = function (event) {
+            db = request.result;
+            console.log("success: " + db);
+        };
+
+        //Init database in memory
+        request.onupgradeneeded = function (event) {
+            console.log("Upgrading... ");
+            var db = event.target.result;
+            var objectStore = db.createObjectStore("messages", { keyPath: "id", autoIncrement: true });
+        }
+
+        //Functions:
+        //Add: adds a postMessage to database. take sin username, ckeditor data, and date
+        function addPost(userName, msgString, date) {
+
+            //Init Post to be added
+            var newPost = [{ id: messageData.size, userName: userName, msgString: msgString, date: date }];
+            var transaction = db.transaction(["messages"], "readwrite");
+
+            //Error handling
+            transaction.onerror = function (event) {
+                console.log("Error, Not opened: " + transaction.error + " -> newPost id: " + newPost[0].id +
+                    " -> database size: " + messageData.size);
+            };
+
+            // Init object store
+            var objectStore = transaction.objectStore("messages");
+            var objectStoreRequest = objectStore.add(newPost[0]);
+
+            //Error handling
+            objectStoreRequest.onsuccess = function (event) {
+                console.log("Item added. -> newPost id: " + newPost[0].id + " -> database size: " + messageData.size);
+                messageData.size++;
+            };
+            objectStoreRequest.onerror = function (event) {
+                console.log("Item Not Added. Error: " + objectStoreRequest.error + " -> newPost id: " + newPost[0].id + " -> database size: " + messageData.size);
+            };
+        }
+
+        //Deletes the most recent post
+        function deletePost() {
+            //Delete post
+            if (messageData.size > 0) {
+                var request = db.transaction(["messages"], "readwrite")
+                    .objectStore("messages")
+                    .delete((messageData.size - 1).toString());
+
+                //Error handling
+                request.onsuccess = function (event) {
+                    console.log("last entry has been removed from your database.");
+                    messageData.size--;
+                };
+                request.onerror = function (event) {
+                    console.log("error: " + request.error);
+                };
+
+            }
+            else
+                console.log("Nothing to be removed.");
+        }
+
+        //Clear database
+        function clearPosts() {
+            //Clear database
+            var request = db.transaction(["messages"], "readwrite")
+                .objectStore("messages")
+                .clear();
+            messageData.size = 0;
+
+            //Error handling
+            request.onsuccess = function (event) {
+                console.log("all data removed from database");
+            };
+            request.onerror = function (event) {
+                console.log("error: " + request.error);
+            };
+
+        }
+    </script>
+</head>
+<body>
+
+    <!--The area of html that will be appended when a post is displayed-->
+    <div id="PostArea"></div>
+
+    <!--The area that is replaced by ckeditor-->
+    <form>
+        <textarea name="editor1" id="editor1" rows="10" cols="80">
+                Create your message here. 
+                    The 'clearPosts database' is important if you've revisited the page,  as it's only Partially persistent. 
+                    'deletePost' deletes the most recent entry. 
+                    'Post' adds the data to the database. 
+                    'displayPost' adds them to the html for viewing
+            </textarea>
+        <script>
+            // Replace the <textarea id="editor1"> with a CKEditor
+            // instance, using default configuration.
+            CKEDITOR.replace('editor1');
+
+            //The 'Post Message' Button, Adds ckeditor data to database
+            function postMessage() {
+                const editorData = CKEDITOR.instances.editor1.getData();
+                console.log(editorData);
+                addPost("username", editorData, "fake")
+
+
+            }
+
+            //The 'Display Post' Button, Displays all current database entries in html
+            function displayPost() {
+                //Display each message
+                for (i = 0; i < messageData.size; i++) {
+                    var transaction = db.transaction(["messages"]);
+                    var objectStore = transaction.objectStore("messages");
+                    var request = objectStore.get(messageData.size - 1);
+
+                    //Error handling
+                    request.onerror = function (event) {
+                        console.log("Error :" + request.error);
+                    };
+                    request.onsuccess = function (event) {
+                        //Display database as html
+                        $("#PostArea").append(
+                            "<p> Post ID: " + request.result.id +
+                            " - Username: " + request.result.userName +
+                            " - Message: " + request.result.msgString +
+                            " - Date: " + request.result.date +
+                            "</p>");
+                        $("#PostArea").append("<hr />")
+                    };
+                    
+                }
+            }
+        </script>
+    </form>
+
+    <!--Buttons used-->
+    <button onclick="displayPost()">Display Post</button>
+    <button onclick="postMessage()">Post Message</button>
+    <button onclick="deletePost()">delete Post</button>
+    <button onclick="clearPosts()">Clear All Posts</button>
+
+</body>
+</html>

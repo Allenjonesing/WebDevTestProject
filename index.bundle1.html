@@ -1,74 +1,63 @@
+﻿<!DOCTYPE html>
+<!--Home page for Wed Developer Testing Project. 
+    Prepared by Allen Jones
+    Uses Bootstrap Modals for login and register forms
+    Adds input data from registration into indexed database
+    References database for password check, proceeds to profile page-->
+
 <html lang="en" >
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- Bootstrap style sheet -->
-  <link rel="stylesheet" href="Resources/bootstrap-4.1.3-dist/css/bootstrap.min.css">
+    <!--Unicode-->
+    <meta charset="utf-8" />
+    <!--Responsive viewpoint-->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Bootstrap style sheet -->
+    <link rel="stylesheet" href="Resources/bootstrap-4.1.3-dist/css/bootstrap.min.css">
+
+
+    <title>Allen Jones - WebDeveloperTestingProject</title>
 </head>
 <body>
-    <!--Your HTML content here-------------------------------------->
-    <h2>My First JavaScript</h2>
-    <!--Begin Example Code------------------------------------------>
+    <!--Your HTML content here-->
+    <!--Display welcome screen-->
     <div class="container">
-        <div class="validCredential">
-            <h3>Try any one of the following three:</h3>
-            <div>
-                <p>
-                    1. Username: Ram
-                </p>
-                <p>
-                    Password: admin
-                </p>
-            </div>
-            <div>
-                <p>
-                    2. Username: Shiv
-                </p>
-                <p>
-                    Password: admin
-                </p>
-            </div>
-            <div>
-                <p>
-                    3. Username: Krishna
-                </p>
-                <p>
-                    Password: admin
-                </p>
-            </div>
-        </div>
+        <div class="welcome">
+            <h1>Welcome!</h1>
+            <h2>This is the home page for Web Developer Testing Program</h2>
+            <h3>There are no esisting accounts, please create one and then log in.</h3>
+        </div> <!--End "welcome"-->
+        <!--Login, Register Buttons-->
+        <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#loginModal">Log In</button>
+        <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#registerModal">Register</button>
 
-
-
-
-        <!-- The button that triggers the Modal -->
-        <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">Open Modal</button>
-        <!-- The button that triggers the Modal 2 -->
-        <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal2">Open Modal</button>
-        <!-- Bootstrap Modal -->
-        <div id="myModal" class="modal fade" role="dialog">
+        <!--Login Modal-->
+        <div id="loginModal" class="modal fade" role="dialog">
             <div class="modal-dialog">
-                <!-- Modal content-->
                 <div class="modal-content">
                     <div class="modal-header">
+                        <!--Greet user with instructions and offer close and register buttons-->
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        <h4 class="modal-title">Log in with your Username</h4>
-                    </div>
+                        <button type="button" class="register" data-target="#registerModal">&times;</button>
+                        <h1 class="modal-title">Log in</h1>
+                        <h2 calss="modal-title">, or create an account.</h2>
+                    </div>  <!--End modal-header-->
                     <div class="modal-body">
+                        <!--Neatly display login forms-->
                         <table>
                             <tbody>
                                 <tr>
                                     <td>
-                                        <input type="text" id="userNameTextBox" placeholder="Username" />
+                                        <input type="text" id="usernameText" placeholder="Username" />
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>
-                                        <span id="userNamSpan"></span>
+                                        <span id="usernameSpan"></span>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>
-                                        <input type="text" id="passwordTextBox" placeholder="Password" />
+                                        <input type="text" id="passwordText" placeholder="Password" />
                                     </td>
                                 </tr>
                                 <tr>
@@ -83,29 +72,21 @@
                                 </tr>
                                 <tr>
                                     <td>
-                                        <span id="messageSpan"></span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <img id="loadingImg" src="loading.gif" />
+                                        <span id="errorSpan"></span>
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
-                    </div>
+                    </div>  <!--End "modal-body"-->
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    </div>
-                </div>
-                <!-- END Modal content-->
-            </div>
-        </div>
-        <!-- END Bootstrap Modal -->
-        <!--Another Modal-->
-        <div id="myModal2" class="modal fade" role="dialog">
+                    </div>  <!--End "modal-footer"-->
+                </div>      <!--End "modal-content"-->
+            </div>          <!--End "modal-dialog"-->
+        </div>              <!--End "login modal"-->
+        <!--Register Modal-->
+        <div id="registerModal" class="modal fade" role="dialog">
             <div class="modal-dialog">
-                <!-- Modal content-->
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
@@ -116,17 +97,17 @@
                             <tbody>
                                 <tr>
                                     <td>
-                                        <input type="text" id="regUserNameTextBox" placeholder="Username" />
+                                        <input type="text" id="regUsernameText" placeholder="Username" />
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>
-                                        <span id="regUserNamSpan"></span>
+                                        <span id="regUsernameSpan"></span>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>
-                                        <input type="text" id="regPasswordTextBox" placeholder="Password" />
+                                        <input type="text" id="regPasswordText" placeholder="Password" />
                                     </td>
                                 </tr>
                                 <tr>
@@ -136,7 +117,7 @@
                                 </tr>
                                 <tr>
                                     <td>
-                                        <input type="text" id="regRptPasswordTextBox" placeholder="Repeat Password" />
+                                        <input type="text" id="regRptPasswordText" placeholder="Repeat Password" />
                                     </td>
                                 </tr>
                                 <tr>
@@ -151,13 +132,7 @@
                                 </tr>
                                 <tr>
                                     <td>
-                                        <span id="regMessageSpan"></span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <img id="loadingImg" src="loading.gif" />
-                                        
+                                        <span id="regErrorSpan"></span>
                                     </td>
                                 </tr>
                             </tbody>
@@ -165,22 +140,11 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    </div>
-                </div>
-                <!-- END Modal content-->
-            </div>
-        </div>
-        <!-- END Bootstrap Modal -->
-
-    </div>
-
-
-    <!--Next Section, involving a C# file--> 
-    
-
-    
-    <!--End Example Code------------------------------------------>
-
+                    </div>  <!--End "Modal-footer-->
+                </div>      <!--End "modal-content"-->
+            </div>          <!--End "modal-dialog-->
+        </div>              <!--End "modal-Modal-->
+    </div>                  <!--End "container"-->
 
     <!-- Bootstrap requires these Libraries -->
     <script src="Resources/jquery.3.3.1/jquery.min.js"></script>
@@ -193,12 +157,9 @@
     <script src="Resources/ckeditor_4.11.2_basic/ckeditor.js"></script>
 
     <!-- Your application javascript --------------------------------------->
-    <script type="text/javascript">                         
-
+    <script type="text/javascript">
         //test implementation prefixes
         window.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
-
-        // window.IDB objects' prefixes
         window.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction;
         window.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange
 
@@ -207,122 +168,68 @@
             window.console.log("Your browser doesn't support a stable version of IndexedDB.")
         }
 
-
-        //if (document.cookie == "")
-        //    document.cookie = 0;
-        var userData = [
-           // { id: 0, username: "admin", password: "admin" }
-        ];
-
-        //database creation request
+        //declare database 
+        var userData = [];
         var data;
-        var request = window.indexedDB.open("newDatabase", 1);
+        var request = window.indexedDB.open("userDatabase", 1);
         userData.size = 0;
-        //userData.size = document.cookie;
-        //console.log(document.cookie)
-
-        //database failed
+        //error handling
         request.onerror = function (event) {
             console.log("error: " + request.error);
         };
-
-        //Database created
         request.onsuccess = function (event) {
             data = request.result;
-            console.log("success: " + data);
-            
-
         };
 
         //check for upgrades
         request.onupgradeneeded = function (event) {
-            console.log("Upgrading... ");
-
             //Create Object Store
-            var data = event.target.result;
+            data = event.target.result;
             var objectStore = data.createObjectStore("users", { keyPath: "id", autoIncrement: true });
-            //userData.size = 0;
-            //clean();
-            //Init Object Store
-            for (var i in userData) {
-                objectStore.add(userData[i]);
-                userData.size++;
-            }
-        }
-        function read() {
-            var transaction = data.transaction(["users"]);
-            var objectStore = transaction.objectStore("users");
-            var request = objectStore.get((userData.size - 1).toString());
+       }
 
-            request.onerror = function (event) {
-                console.log("Unable to retrieve data from database!");
-            };
-
-            request.onsuccess = function (event) {
-                // Do something with the request.result!
-                console.log("Current length of database: " + userData.size);
-                if (request.result) {
-                    console.log("Name: " + request.result.name +
-                        " Age: " + request.result.age + "Email: " + request.result.email);
-                } else {
-                    console.log("Kenny couldn't be found in your database!");
-                }
-            };
-        }
         //Create new account, add user input to database
         function register(username, password) {
-            // Create a new object ready to insert into the IDB
-            //console.log(userData.size);
-            var newUser = [{ id: userData.size, username: username, password: password }];
-
-            // open a read/write data transaction, ready for adding the data
+            //Init user to be added
+            var newUser = [{ id: userData.size+0, username: username, password: password }];
             var transaction = data.transaction(["users"], "readwrite");
-
-            // report on the success of the transaction completing, when everything is done
-            transaction.onsuccess = function (event) {
-                console.log("Transaction Complete!");
-            };
-
+            //Error handling
             transaction.onerror = function (event) {
-                console.log("Error, Not opened: " + transaction.error + " -> newItem id: " + newItem[0].id + " -> database size: " + userData.size);
+                console.log("Error, Not opened: " + transaction.error +
+                    " -> newItem id: " + newUser[0].id + " -> database size: " + userData.size);
             };
-
-            // create an object store on the transaction
+            //Init Object Store of
             var objectStore = transaction.objectStore("users");
-
-            // Make a request to add our newItem object to the object store
             var objectStoreRequest = objectStore.add(newUser[0]);
-
+            //Error handling
             objectStoreRequest.onsuccess = function (event) {
-                // report the success of our request
                 console.log("User added. -> newItem id: " + newUser[0].id + " -> database size: " + userData.size);
                 userData.size++;
-                //var getActive = browser.tabs.query({ active: true, currentWindow: true });
-                //getActive.then(setCookie);
-                //document.cookie = userData.size.toString();
-
-
             };
             objectStoreRequest.onerror = function (event) {
-                // report the error of our request
                 console.log("User Not Added. Error: " + objectStoreRequest.error + " -> newItem id: " + newUser[0].id + " -> database size: " + userData.size);
-
             };
-
-
-            /*request.onerror = function (event) {
-                console.log("error: " + request.error + " -> newItem id: " + newUser[0].id + " -> database size: " + userData.size);
-            }*/
-        }
+        } //End Register()
 
         //Login to existing account, search database for user input
         function login(username, password) {
+            //Init database to reference
             var transaction = data.transaction(["users"]);
             var objectStore = transaction.objectStore("users");
-            var request = objectStore.get("username");
-            request.onerror = function (event) {
-                console.log("error: " + request.error + " -> newItem id: " + newUser.id + " -> database size: " + userData.size);
+            var request = objectStore.get(username);
+            
+
+            for (i = 0; i < userData.size; i++) { 
+                    if (userData[i].username == username) {
+                        console.log("FOUND");
+                        if (userData[i].password === password)
+                            goToProfile();
+                }
             };
+            //Error handling
+            request.onerror = function (event) {
+                console.log("error: " + request.error + " -> newItem id: " + request.result.id + " -> database size: " + userData.size);
+            };/*
             request.onsuccess = function (event) {
                 //check username against password
                 console.log("checking username '" + username + "'.");
@@ -332,98 +239,52 @@
                     goToProfile();
                 }
 
-            };
-        }
+            };//End Request*/
+        }//End Login
 
-        function clean() {
-            var request = data.transaction(["users"], "readwrite")
-                .objectStore("users")
-                .clear();
-            userData.size = 0;
-            request.onsuccess = function (event) {
-                console.log("all data removed from database");
-            };
-            request.onerror = function (event) {
-                console.log("error: " + request.error);
-            };
-
-        }
-
-
-        //create new password, edit database entry after answering security question
-        /*function forgotPass() {
-
-        }*/
-
-
-        //Begin Example--------------
+        //Check input areas for errors
         $("#loginButton").click(function (e) {
             console.log("login pressed");
-            if ($("#userNameTextBox").val() == "")
-                $("#userNamSpan").text("Enter Username");
+            if ($("#usernameText").val() == "")
+                $("#usernameSpan").text("Enter Username");
             else
-                $("#userNamSpan").text("");
-            if ($("#passwordTextBox").val() == "")
+                $("#usernameSpan").text("");
+            if ($("#passwordText").val() == "")
                 $("#passwordSpan").text("Enter Password");
             else
                 $("#passwordSpan").text("");
-            if (($("#userNameTextBox").val() != "") && ($("#passwordTextBox").val() != "")) {
-                $("#loadingImg").show();
-                //setTimeout(goToProfile, 3000);
-                login($("#userNameTextBox").val(), $("#passwordTextBox").val());
+            if (($("#usernameText").val() != "") && ($("#passwordText").val() != "")) {
+                //login($("#usernameText").val(), $("#passwordText").val());
+                //Skipping authentication
+                goToProfile();
             }
         });
 
         $("#registerButton").click(function (e) {
             console.log("register pressed");
-            if ($("#regUserNameTextBox").val() == "")
-                $("#regUserNamSpan").text("Enter Username");
+            if ($("#regUsernameText").val() == "")
+                $("#regUsernameSpan").text("Enter Username");
             else
-                $("#regUserNamSpan").text("");
-            if ($("#regPasswordTextBox").val() == "")
+                $("#regUsernameSpan").text("");
+            if ($("#regPasswordText").val() == "")
                 $("#regPasswordSpan").text("Enter Password");
             else
                 $("#regPasswordSpan").text("");
-            if ($("#regRptPasswordTextBox").val() == "")
+            if ($("#regRptPasswordText").val() == "")
                 $("#regRptPasswordSpan").text("Retype Password");
+            else if ($("#regRptPasswordText").val() != $("#regPasswordText").val())
+                $("#regRptPasswordSpan").text("No Match!");
             else
                 $("#regRptPasswordSpan").text("");
-            if (($("#regUserNameTextBox").val() != "") && ($("#regPasswordTextBox").val() != "") && ($("#regRptPasswordTextBox").val() != "")) {
-                $("#loadingImg").show();
-                //setTimeout(goToProfile, 3000);
-                register($("#regUserNameTextBox").val(), $("#regPasswordTextBox").val());
+            if (($("#regUsernameText").val() != "") && ($("#regPasswordText").val() != "") && ($("#regRptPasswordText").val() != "")) {
+                register($("#regUsernameText").val(), $("#regPasswordText").val());
             }
         });
-                /*$.ajax({
-                    type: "POST",
-                    url: "index.aspx/login",
-                    contentType: "application/json; charset=utf-8",
-                    data: '{"username":"' + $("#userNameTextBox").val() + '","password":"' + $("#passwordTextBox").val() + '"}',
-                    dataType: "json",
-                    success: function (result, status, xhr) {
-                        if (result.d == "Success") {
-                            $("#messageSpan").text("Login Successful, Redireting to your profile page.");
-                            setTimeout(function () { window.location = "profile.aspx"; }, 2000);
-                        }
-                        else
-                            $("#messageSpan").text("Login failed, Please try again.");
-                    },
-                    error: function (xhr, status, error) {
-                        $("#dbData").html("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
-                    }
-                });*/
+
+        //Go to profile page
         function goToProfile() {
-            window.location.href = "indexedDB.html";
-            $("#loadingImg").hide();
+            window.location.href = "messageDatabase.html";
         }
-        $(document).ajaxStart(function () {
-            $("#loadingImg").show();
-        });
-        $(document).ajaxStop(function () {
-            $("#loadingImg").hide();
-        });    
-
-    </script>
-
-</body>
-</html>
+    </script> <!--End Script-->
+</body >
+</html >
