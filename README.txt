@@ -1,5 +1,8 @@
-All required libraries, plugins, and frameworks are included in this folder under the Resources folder.
+Starting in index.Bundle1
 
-Two HTML files are available to get you started.
-- If you want to use jQuery & Bootstrap start in index.bundle1.html.
-- If you want to use AngularJS v1 & Angular Material start in index.bundle2.html.
+-Modals are used as login and register forms.
+i-ndexedDBs are used for user credentials and messages posted.
+
+Known Bugs:
+-Database size isn't persistent, causeing a need to delete database data on each visit.
+-User credential database on index.bundle1 returns undefined entries, causing user authentication to fail.
