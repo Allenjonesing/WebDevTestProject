@@ -1,11 +1,21 @@
 ﻿<!DOCTYPE html>
-<!--Home page for Wed Developer Testing Project. 
+<!--Home page for Wed Developer Testing Project.
     Prepared by Allen Jones
     Uses Bootstrap Modals for login and register forms
     Adds input data from registration into indexed database
-    References database for password check, proceeds to profile page-->
+    References database for password check, proceeds to profile page
 
-<html lang="en" >
+    Functions
+    Resister - Takes user input for username and password
+    adds info to indexed database, handles errors
+
+    login - Takes user input for username and password
+    attempts to reference input password with database entry matching username
+    this poses security risks, allowing password to be viewed in debugging.
+    ERROR: bypasses password check and logs in-->
+
+
+<html lang="en">
 <head>
     <!--Unicode-->
     <meta charset="utf-8" />
@@ -14,7 +24,7 @@
     <!-- Bootstrap style sheet -->
     <link rel="stylesheet" href="Resources/bootstrap-4.1.3-dist/css/bootstrap.min.css">
 
-
+    <!--Sets page title-->
     <title>Allen Jones - WebDeveloperTestingProject</title>
 </head>
 <body>
@@ -26,7 +36,7 @@
             <h2>This is the home page for Web Developer Testing Program</h2>
             <h3>There are no existing accounts, please create one and then log in.</h3>
         </div> <!--End "welcome"-->
-        <!--Login, Register Buttons-->
+        <!--Login, Register Buttons, assigned to open Modals-->
         <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#loginModal">Log In</button>
         <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#registerModal">Register</button>
 
@@ -38,6 +48,7 @@
                         <!--Greet user with instructions and offer close and register buttons-->
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
                         <button type="button" class="register" data-target="#registerModal">&times;</button>
+                        <!--User instructions-->
                         <h1 class="modal-title">Log in</h1>
                         <h2 calss="modal-title">, or create an account.</h2>
                     </div>  <!--End modal-header-->
@@ -47,31 +58,37 @@
                             <tbody>
                                 <tr>
                                     <td>
+                                        <!--username input field-->
                                         <input type="text" id="usernameText" placeholder="Username" />
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>
+                                        <!--error message, like "Enter username"-->
                                         <span id="usernameSpan"></span>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>
+                                        <!--Password input field-->
                                         <input type="text" id="passwordText" placeholder="Password" />
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>
+                                        <!--error message, like "Enter password"-->
                                         <span id="passwordSpan"></span>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>
+                                        <!--Login button-->
                                         <input type="button" id="loginButton" value="Login" />
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>
+                                        <!--Error message other-->
                                         <span id="errorSpan"></span>
                                     </td>
                                 </tr>
@@ -79,6 +96,7 @@
                         </table>
                     </div>  <!--End "modal-body"-->
                     <div class="modal-footer">
+                    <!--close button for login Modal-->
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                     </div>  <!--End "modal-footer"-->
                 </div>      <!--End "modal-content"-->
@@ -89,6 +107,7 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
+                        <!--<!--close button for Register Modal-->-->
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
                         <h4 class="modal-title">Register a Username and Password</h4>
                     </div>
@@ -97,6 +116,7 @@
                             <tbody>
                                 <tr>
                                     <td>
+                                        <!--username-->
                                         <input type="text" id="regUsernameText" placeholder="Username" />
                                     </td>
                                 </tr>
@@ -145,7 +165,6 @@
             </div>          <!--End "modal-dialog-->
         </div>              <!--End "modal-Modal-->
     </div>                  <!--End "container"-->
-
     <!-- Bootstrap requires these Libraries -->
     <script src="Resources/jquery.3.3.1/jquery.min.js"></script>
     <script src="Resources/bootstrap-4.1.3-dist/js/popper.min.js"></script>
@@ -168,7 +187,7 @@
             window.console.log("Your browser doesn't support a stable version of IndexedDB.")
         }
 
-        //declare database 
+        //declare database
         var userData = [];
         var data;
         var request = window.indexedDB.open("userDatabase", 1);
@@ -185,13 +204,13 @@
         request.onupgradeneeded = function (event) {
             //Create Object Store
             data = event.target.result;
-            var objectStore = data.createObjectStore("users", { keyPath: "id", autoIncrement: true });
-       }
+            var objectStore = data.createObjectStore("users", { keyPath: "id" });
+        }
 
         //Create new account, add user input to database
         function register(username, password) {
             //Init user to be added
-            var newUser = [{ id: userData.size+0, username: username, password: password }];
+            var newUser = [{ id: userData.size + 0, username: username, password: password }];
             var transaction = data.transaction(["users"], "readwrite");
             //Error handling
             transaction.onerror = function (event) {
@@ -217,29 +236,29 @@
             var transaction = data.transaction(["users"]);
             var objectStore = transaction.objectStore("users");
             var request = objectStore.get(username);
-            
 
-            for (i = 0; i < userData.size; i++) { 
-                    if (userData[i].username == username) {
-                        console.log("FOUND");
-                        if (userData[i].password === password)
-                            goToProfile();
+
+            for (i = 0; i < userData.size; i++) {
+                if (userData[i].username == username) {
+                    console.log("FOUND");
+                    if (userData[i].password === password)
+                        goToProfile();
                 }
             };
             //Error handling
             request.onerror = function (event) {
                 console.log("error: " + request.error + " -> newItem id: " + request.result.id + " -> database size: " + userData.size);
             };/*
-            request.onsuccess = function (event) {
-                //check username against password
-                console.log("checking username '" + username + "'.");
-                if (password == request.result.password) {
-                    //correct password, logging in....
-                    console.log("correct password, logging in....");
-                    goToProfile();
-                }
+                request.onsuccess = function (event) {
+                    //check username against password
+                    console.log("checking username '" + username + "'.");
+                    if (password == request.result.password) {
+                        //correct password, logging in....
+                        console.log("correct password, logging in....");
+                        goToProfile();
+                    }
 
-            };//End Request*/
+                };//End Request*/
         }//End Login
 
         //Check input areas for errors
@@ -286,5 +305,5 @@
             window.location.href = "messageDatabase.html";
         }
     </script> <!--End Script-->
-</body >
-</html >
+</body>
+</html>

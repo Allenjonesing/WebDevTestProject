@@ -10,11 +10,13 @@
     <!-- Bootstrap requires these Libraries -->
     <script src="Resources/jquery.3.3.1/jquery.min.js"></script>
     <script src="Resources/bootstrap-4.1.3-dist/js/popper.min.js"></script>
-    
+    <!-- Bootstrap style sheet -->
+    <link rel="stylesheet" href="Resources/bootstrap-4.1.3-dist/css/bootstrap.min.css">
+
     <meta http-equiv="Content-Type" content="text/html; charset = utf-8" />
 
     <script type="text/javascript">
-        
+
         //Test implementation prefixes
         window.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
         window.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction;
@@ -30,6 +32,9 @@
         var db;
         var request = window.indexedDB.open("newDatabase", 1);
 
+        //Set up cookies
+
+
         //Error handling
         request.onerror = function (event) {
             console.log("error: " + request.error);
@@ -43,7 +48,15 @@
         request.onupgradeneeded = function (event) {
             console.log("Upgrading... ");
             var db = event.target.result;
-            var objectStore = db.createObjectStore("messages", { keyPath: "id", autoIncrement: true });
+            var objectStore = db.createObjectStore("messages", { keyPath: "id" });
+        }
+
+        //Set cookie, used for database size
+        function setCookie(cname, cvalue, exdays) {
+            var d = new Date();
+            d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+            var expires = "expires=" + d.toUTCString();
+            document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
         }
 
         //Functions:
@@ -113,6 +126,8 @@
             };
 
         }
+
+
     </script>
 </head>
 <body>
