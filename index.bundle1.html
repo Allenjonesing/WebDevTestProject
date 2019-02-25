@@ -190,8 +190,8 @@
         //declare database
         var userData = [];
         var data;
-        var request = window.indexedDB.open("userDatabase", 1);
-        userData.size = 0;
+        var request = window.indexedDB.open("users", 1);
+        //userData.size = 0;
         //error handling
         request.onerror = function (event) {
             console.log("error: " + request.error);
@@ -203,15 +203,22 @@
         //check for upgrades
         request.onupgradeneeded = function (event) {
             //Create Object Store
-            data = event.target.result;
-            var objectStore = data.createObjectStore("users", { keyPath: "id" });
+            var data = event.target.result;
+            var objectStore = data.createObjectStore("users", { keyPath: "username" });
+            //Count the database to determin next id
+            var countRequest = objectStore.count();
+            countRequest.onsuccess = function () {
+                console.log(countRequest.result);
+                userData.size = countRequest.result;
+            }
         }
 
         //Create new account, add user input to database
         function register(username, password) {
-            //Init user to be added
-            var newUser = [{ id: userData.size + 0, username: username, password: password }];
+
+            //Init 
             var transaction = data.transaction(["users"], "readwrite");
+
             //Error handling
             transaction.onerror = function (event) {
                 console.log("Error, Not opened: " + transaction.error +
@@ -219,7 +226,18 @@
             };
             //Init Object Store of
             var objectStore = transaction.objectStore("users");
+
+            //Count the database to determin next id
+            var countRequest = objectStore.count();
+            countRequest.onsuccess = function () {
+                console.log(countRequest.result);
+                userData.size = countRequest.result;
+            }
+
+            //Init and add new user
+            var newUser = [{ username: username, id: userData.size, password: password }];
             var objectStoreRequest = objectStore.add(newUser[0]);
+
             //Error handling
             objectStoreRequest.onsuccess = function (event) {
                 console.log("User added. -> newItem id: " + newUser[0].id + " -> database size: " + userData.size);
@@ -236,15 +254,38 @@
             var transaction = data.transaction(["users"]);
             var objectStore = transaction.objectStore("users");
             var request = objectStore.get(username);
+            
+            request.onsuccess = function (event) {
+                if (request.result) {
+                    if (request.result.password === password)
+                        goToProfile();
+                    else
+                        console.log("ERROR, wrong password")
+                }
+                else
+                    console.log("ERROR, wrong username")
+                /*var cursor = event.target.result;
+                if (cursor) {
+                    //var listItem = document.createElement('li');
+                    //listItem.innerHTML = cursor.value.userName + ', ' + cursor.value.msgString + ', ' + cursor.value.date;
+                    //list.appendChild(listItem);
 
+                    //$("#PostArea").append(listItem);
+                    
+                    cursor.continue();
+                } else {
+                    console.log('all Entries displayed.');
+                }*/
+            };
 
+            /*
             for (i = 0; i < userData.size; i++) {
                 if (userData[i].username == username) {
                     console.log("FOUND");
                     if (userData[i].password === password)
                         goToProfile();
                 }
-            };
+            };*/
             //Error handling
             request.onerror = function (event) {
                 console.log("error: " + request.error + " -> newItem id: " + request.result.id + " -> database size: " + userData.size);
@@ -273,9 +314,9 @@
             else
                 $("#passwordSpan").text("");
             if (($("#usernameText").val() != "") && ($("#passwordText").val() != "")) {
-                //login($("#usernameText").val(), $("#passwordText").val());
+                login($("#usernameText").val(), $("#passwordText").val());
                 //Skipping authentication
-                goToProfile();
+               // goToProfile();
             }
         });
 
