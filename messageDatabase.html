@@ -168,36 +168,64 @@
             function displayPost() {
                 //Display each message
                 console.log("Display button pressed");
-                }
-            for (i = 0; i < messageData.size; i++) {
-                    console.log("Message: " + i)
+
+                var transaction = db.transaction(["messages"]);
+                var objectStore = transaction.objectStore("messages");
+
+                //var transaction = db.transaction(['rushAlbumList'], "readonly");
+                //var objectStore = transaction.objectStore('rushAlbumList');
+                $("#PostArea").empty();
+                objectStore.openCursor().onsuccess = function (event) {
+                   
+                    var cursor = event.target.result;
+                    if (cursor) {
+                        var listItem = document.createElement('li');
+                        listItem.innerHTML = cursor.value.userName + ', ' + cursor.value.msgString + ', ' + cursor.value.date;
+                        //list.appendChild(listItem);
+                        
+                        $("#PostArea").append(listItem);
+                        cursor.continue();
+                    } else {
+                        console.log('all Entries displayed.');
+                    }
+                };
+                /*deprecated
+                //Display each message
+                console.log("Display button pressed");
+                //remove old messages to display all new ones
+                $("#PostArea").empty();
+                for (i = 0; i < messageData.size; i++) {
+                    console.log("Message: " + i);
                     var transaction = db.transaction(["messages"]);
                     var objectStore = transaction.objectStore("messages");
                     var request = objectStore.get(messageData.size - 1);
-
+    
                     //Count the database to determin next id
                     var countRequest = objectStore.count();
                     countRequest.onsuccess = function () {
                         console.log(countRequest.result);
                         messageData.size = countRequest.result;
-
+                    }//End success
                     //Error handling
                     request.onerror = function (event) {
                         console.log("Error :" + request.error);
-                    };
+                    };//End error
                     request.onsuccess = function (event) {
+                        
                         //Display database as html
                         console.log("Success, Appending...")
                         $("#PostArea").append(
-                            "<p> Post ID: " + request.result.id +
+                            "<div class='card'> <p> Post ID: " + request.result.id +
                             " - Username: " + request.result.userName +
                             " - Message: " + request.result.msgString +
                             " - Date: " + request.result.date +
-                            "</p>");
+                            "</p> </div> ");
+                               
                         $("#PostArea").append("<hr />")
-                    };
+                    };//End success
 
-                }
+                }//End for(messageData.size)
+                */
             }
         </script>
     </form>
