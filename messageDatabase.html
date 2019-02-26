@@ -33,6 +33,8 @@
         var db;
         var request = window.indexedDB.open("messages", 1);
 
+        //var username = location.search( "username");
+
         //Error handling
         request.onerror = function (event) {
             console.log("error: " + request.error);
@@ -100,25 +102,31 @@
         }
 
         //Deletes the most recent post
-        function deletePost() {
+        function deletePost(postId) {
             //Delete post
-            if (messageData.size > 0) {
-                var request = db.transaction(["messages"], "readwrite")
-                    .objectStore("messages")
-                    .delete((messageData.size - 1).toString());
+            console.log("Delete")
+            var request = db.transaction(["messages"], "readwrite")
+                .objectStore("messages")
+                .delete(postId);
 
-                //Error handling
-                request.onsuccess = function (event) {
-                    console.log("last entry has been removed from your database.");
-                    messageData.size--;
-                };
-                request.onerror = function (event) {
-                    console.log("error: " + request.error);
-                };
+            //Error handling
+            request.onsuccess = function (event) {
+                console.log("post removed from your database.");
+                messageData.size--;
+                displayPost();
+            };
+            request.onerror = function (event) {
+                console.log("error: " + request.error);
+            };
+
+            /*
+            if (messageData.size > 0) {
+
+                
 
             }
             else
-                console.log("Nothing to be removed.");
+                console.log("Nothing to be removed.");*/
         }
 
         //Clear database
@@ -162,11 +170,18 @@
             // instance, using default configuration.
             CKEDITOR.replace('editor1');
 
+            var username = window.location.hash.substring(1)
+
             //The 'Post Message' Button, Adds ckeditor data to database
             function postMessage() {
+                //var today = Date.now;
+                //var UTCstring = today.toUTCString(); // Wed, 14 Jun 2017 07:00:00 GMT
+                var today = new Date();
+                var dd = today.getDate();
+                var mm = today.getMonth() + 1; 
                 const editorData = CKEDITOR.instances.editor1.getData();
                 console.log(editorData);
-                addPost("username", editorData, "fake")
+                addPost(username, editorData, (mm + " / " + dd));
 
 
             }
@@ -174,7 +189,7 @@
             // Displays all current database entries in html
             function displayPost() {
                 //Display each message
-                console.log("Display button pressed");
+                console.log("Displaying...");
 
                 var transaction = db.transaction(["messages"]);
                 var objectStore = transaction.objectStore("messages");
@@ -183,10 +198,20 @@
                    
                     var cursor = event.target.result;
                     if (cursor) {
-                        var listItem = document.createElement('li');
-                        listItem.innerHTML = cursor.value.userName + ', ' + cursor.value.msgString + ', ' + cursor.value.date;
+                        var listItem = document.createElement("li");
+                        //sessionStorage.setItem("postId", ( cursor.value.id.toString() ));
+                        //document.cookie = "postId="+.toString();
+                        //$("#example2 a").attr("href", url + "?id=" + cursor.value.id);
+                        listItem.innerHTML = cursor.value.userName 
+                            + cursor.value.msgString 
+                            + cursor.value.date
+                            + "<button onclick='deletePost("
+                            + cursor.value.id
+                            + ") '>delete Post</button>";
+;
                         //list.appendChild(listItem);
-                        
+                            //<button onclick="deletePost()">delete Post</button>
+
                         $("#PostArea").append(listItem);
                         cursor.continue();
                     } else {
