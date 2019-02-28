@@ -1,15 +1,26 @@
 ﻿<!DOCTYPE html>
-<!--Home page for Wed Developer Testing Project.
+<!--SPA for Wed Developer Testing Project.
     Prepared by Allen Jones
     Uses Bootstrap Modals for login and register forms
     Adds input data from registration into indexed database
     References database for password check, proceeds to profile page
 
     The database is persistant through browser close. No accounts exist at first
+    Messages are displayed through html appendages, and removed and re-appended
+    during each visit, post, and deletion.
 
+    html head:
+        Resources
 
-    Functions
-    legister - Takes user input for username and password
+    html body:
+        Welcome screen/header(persistant thropugh pages)
+        ckeditor area
+        Message area (includes edit post area)
+            created elements for threads
+                Created area for replies
+
+    Javascript Functions
+    Register - Takes user input for username and password
     adds info to indexed database, handles errors
 
     login - Takes user input for username and password
@@ -18,177 +29,202 @@
 
     goToProfile - Sends user to the messageDatabase.html and passes their username along
 
+    ''
     -->
-
 
 <html lang="en">
 <head>
-    <!--Unicode-->
-    <meta charset="utf-8" />
     <!--Responsive viewpoint-->
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!--ckeditor resourses-->
+    <script src="Resources/ckeditor_4.11.2_basic/ckeditor.js"></script>
+    <!-- Bootstrap requires these Libraries -->
+    <script src="Resources/jquery.3.3.1/jquery.min.js"></script>
+    <script src="Resources/bootstrap-4.1.3-dist/js/popper.min.js"></script>
     <!-- Bootstrap style sheet -->
     <link rel="stylesheet" href="Resources/bootstrap-4.1.3-dist/css/bootstrap.min.css">
+    <!--Unicode content-->
+    <meta http-equiv="Content-Type" content="text/html; charset = utf-8" />
 
     <!--Sets page title-->
     <title>Allen Jones - WebDeveloperTestingProject</title>
 </head>
 <body>
-    <!--Your HTML content here-->
-    <!--Display welcome screen-->
     <div class="container">
         <div class="welcome">
             <h1><img id="Jimg" src="jimg.png" height="100" width="100" /> Welcome!</h1>
             <h2>This is the home page for Web Developer Testing Program</h2>
             <h3>There are no existing accounts, please create one and then log in.</h3>
-        </div> <!--End "welcome"-->
-        <!--Login, Register Buttons, assigned to open Modals-->
-        <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#loginModal">Log In</button>
-        <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#registerModal">Register</button>
+            <!--Login, Register Buttons, assigned to open Modals-->
+            <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#loginModal">Log In</button>
+            <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#registerModal">Register</button>
 
-        <!--Login Modal-->
-        <div id="loginModal" class="modal fade" role="dialog">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <!--Greet user with instructions and offer close and register buttons-->
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        <button type="button" class="register" data-target="#registerModal">&times;</button>
-                        <!--User instructions-->
-                        <h4 calss="modal-title">Log in, or create an account.</h4>
-                    </div>  <!--End modal-header-->
-                    <div class="modal-body">
-                        <!--Neatly display login forms-->
-                        <table>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <!--username input field-->
-                                        <input type="text" id="usernameText" placeholder="Username" />
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <!--error message, like "Enter username"-->
-                                        <span id="usernameSpan"></span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <!--Password input field-->
-                                        <input type="text" id="passwordText" placeholder="Password" />
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <!--error message, like "Enter password"-->
-                                        <span id="passwordSpan"></span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <!--Login button-->
-                                        <input type="button" id="loginButton" value="Login" />
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <!--Error message other-->
-                                        <span id="errorSpan"></span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <img id="loadingImg" src="loading.gif" />
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>  <!--End "modal-body"-->
-                    <div class="modal-footer">
-                        <!--close button for login Modal-->
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    </div>  <!--End "modal-footer"-->
-                </div>      <!--End "modal-content"-->
-            </div>          <!--End "modal-dialog"-->
-        </div>              <!--End "login modal"-->
-        <!--Register Modal-->
-        <div id="registerModal" class="modal fade" role="dialog">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <!--close button for Register Modal-->
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        <h4 class="modal-title">Register a Username and Password</h4>
-                    </div>
-                    <div class="modal-body">
-                        <table>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <!--username-->
-                                        <input type="text" id="regUsernameText" placeholder="Username" />
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <span id="regUsernameSpan"></span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <input type="text" id="regPasswordText" placeholder="Password" />
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <span id="regPasswordSpan"></span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <input type="text" id="regRptPasswordText" placeholder="Repeat Password" />
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <span id="regRptPasswordSpan"></span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <input type="button" id="registerButton" value="Register" />
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <span id="regErrorSpan"></span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <img id="regLoadingImg" src="loading.gif" />
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    </div>  <!--End "Modal-footer-->
-                </div>      <!--End "modal-content"-->
-            </div>          <!--End "modal-dialog-->
-        </div>              <!--End "modal-Modal-->
-    </div>                  <!--End "container"-->
-    <!-- Bootstrap requires these Libraries -->
-    <script src="Resources/jquery.3.3.1/jquery.min.js"></script>
-    <script src="Resources/bootstrap-4.1.3-dist/js/popper.min.js"></script>
+            <!--Login Modal-->
+            <div id="loginModal" class="modal fade" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <!--Greet user with instructions and offer close and register buttons-->
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <button type="button" class="register" data-target="#registerModal">&times;</button>
+                            <!--User instructions-->
+                            <h4 calss="modal-title">Log in, or create an account.</h4>
+                        </div>  <!--End modal-header-->
+                        <div class="modal-body">
+                            <!--Neatly display login forms-->
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <!--username input field-->
+                                            <input type="text" id="usernameText" placeholder="Username" />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <!--error message, like "Enter username"-->
+                                            <span id="usernameSpan"></span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <!--Password input field-->
+                                            <input type="text" id="passwordText" placeholder="Password" />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <!--error message, like "Enter password"-->
+                                            <span id="passwordSpan"></span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <!--Login button-->
+                                            <input type="button" id="loginButton" value="Login" />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <!--Error message other-->
+                                            <span id="errorSpan"></span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <img id="loadingImg" src="loading.gif" />
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>  <!--End "modal-body"-->
+                        <div class="modal-footer">
+                            <!--close button for login Modal-->
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        </div>  <!--End "modal-footer"-->
+                    </div>      <!--End "modal-content"-->
+                </div>          <!--End "modal-dialog"-->
+            </div>              <!--End "login modal"-->
+            <!--Register Modal-->
+            <div id="registerModal" class="modal fade" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <!--close button for Register Modal-->
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <h4 class="modal-title">Register a Username and Password</h4>
+                        </div>
+                        <div class="modal-body">
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <!--username-->
+                                            <input type="text" id="regUsernameText" placeholder="Username" />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <span id="regUsernameSpan"></span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <input type="text" id="regPasswordText" placeholder="Password" />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <span id="regPasswordSpan"></span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <input type="text" id="regRptPasswordText" placeholder="Repeat Password" />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <span id="regRptPasswordSpan"></span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <input type="button" id="registerButton" value="Register" />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <span id="regErrorSpan"></span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <img id="regLoadingImg" src="loading.gif" />
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        </div>  <!--End "Modal-footer-->
+                    </div>      <!--End "modal-content"-->
+                </div>          <!--End "modal-dialog-->
+            </div>              <!--End "modal-Modal-->
+        </div>                  <!--End "container"-->
+    </div>                      <!--End "welcome page:-->
+    <div class="ckeditor">
+        <!--The area that is replaced by ckeditor-->
+        <form>
+            <textarea name="editor1" id="editor1" rows="10" cols="80">
+                Create your message here. Push "Post Button" to post it and have it displayed. 
+                    All user messages go here, and can be deleted individually.
+                    This data will persist after the browser is closed.
+            </textarea>
+            <script>
+                // Replace the <textarea id="editor1"> with a CKEditor
+                // instance, using default configuration.
+                <input type="text" id="titleText" placeholder="Title" />
+                CKEDITOR.replace('editor1');
 
-    <!-- Bootstrap JS Library -->
-    <script src="Resources/bootstrap-4.1.3-dist/js/bootstrap.min.js"></script>
 
-    <!-- CKEditor JS Library -->
-    <script src="Resources/ckeditor_4.11.2_basic/ckeditor.js"></script>
+                //The 'Post Message' Button, Adds ckeditor data to database
+
+            </script>
+        </form>
+
+    </div>
+    <div class="threads">
+        <div class="messages">
+            <!--The area of html that will be appended when a post is displayed-->
+            <div class="container">
+                <div class="card">
+                    <div id="threadArea"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Your application javascript --------------------------------------->
     <script type="text/javascript">
@@ -202,10 +238,13 @@
             window.console.log("Your browser doesn't support a stable version of IndexedDB.")
         }
 
-        //declare database and open
+        //declare database for users and open
         var userData = [];
         var data;
         var request = window.indexedDB.open("users", 1);
+        var thread = "";
+        var username = window.location.hash.substring(1)
+
         //userData.size = 0;
         //error handling
         request.onerror = function (event) {
@@ -214,7 +253,6 @@
         request.onsuccess = function (event) {
             data = request.result;
         };
-
         //check for upgrades, a new databse is created
         request.onupgradeneeded = function (event) {
             //Create Object Store
@@ -228,9 +266,86 @@
             }
         }
 
+        //Declare database for users and open
+        var messageData = [];
+        var db;
+        var request = window.indexedDB.open("messages", 1);
+        //Error handling
+        request.onerror = function (event) {
+            console.log("error: " + request.error);
+        };
+
+        //Successful open of database, set it and open object store
+        request.onsuccess = function (event) {
+            db = request.result;
+            //reset pastarea element so that existing posts appear on page load
+            displayPost();
+            var transaction = db.transaction("messages");
+            var objectStore = transaction.objectStore("messages");
+            console.log("success: " + db);
+            //Count the database to determin next id
+            var countRequest = objectStore.count();
+            countRequest.onsuccess = function () {
+                console.log(countRequest.result);
+                messageData.size = countRequest.result;
+            }
+        };
+        //Init database in memory
+        request.onupgradeneeded = function (event) {
+            console.log("Upgrading... ");
+            var db = event.target.result;
+            var objectStore = db.createObjectStore("messages", { keyPath: "id" });
+
+        }
+
         //hide loading images
         $("#loadingImg").hide();
         $("#regLoadingImg").hide();
+
+        //Check input areas for errors
+        $("#loginButton").click(function (e) {
+            console.log("login pressed");
+            //Ensure user entered a value
+            if ($("#usernameText").val() == "")
+                $("#usernameSpan").text("Enter Username");
+            else
+                $("#usernameSpan").text("");
+            //Ensure user entered a value
+            if ($("#passwordText").val() == "")
+                $("#passwordSpan").text("Enter Password");
+            else
+                $("#passwordSpan").text("");
+            //Both fields have values, attempt to login
+            if (($("#usernameText").val() != "") && ($("#passwordText").val() != "")) {
+                login($("#usernameText").val(), $("#passwordText").val());
+            }
+        });
+
+        //Check input areas for errors
+        $("#registerButton").click(function (e) {
+            console.log("register pressed");
+            //Ensure user entered a value
+            if ($("#regUsernameText").val() == "")
+                $("#regUsernameSpan").text("Enter Username");
+            else
+                $("#regUsernameSpan").text("");
+            //Ensure user entered a value
+            if ($("#regPasswordText").val() == "")
+                $("#regPasswordSpan").text("Enter Password");
+            else
+                $("#regPasswordSpan").text("");
+            //Ensure user entered a value
+            if ($("#regRptPasswordText").val() == "")
+                $("#regRptPasswordSpan").text("Retype Password");
+            //Ensure user entered matching passwords
+            else if ($("#regRptPasswordText").val() != $("#regPasswordText").val())
+                $("#regRptPasswordSpan").text("No Match!");
+            //All criteria meet, attept to register
+            else if (($("#regUsernameText").val() != "") && ($("#regPasswordText").val() != "") && ($("#regRptPasswordText").val() != "")) {
+                $("#regRptPasswordSpan").text("");
+                register($("#regUsernameText").val().trim(), $("#regPasswordText").val().trim());
+            }
+        });//End register()
 
         //Create new account, add user input to database
         function register(username, password) {
@@ -305,56 +420,155 @@
             };
         }//End Login()
 
-        //Check input areas for errors
-        $("#loginButton").click(function (e) {
-            console.log("login pressed");
-            //Ensure user entered a value
-            if ($("#usernameText").val() == "")
-                $("#usernameSpan").text("Enter Username");
-            else
-                $("#usernameSpan").text("");
-            //Ensure user entered a value
-            if ($("#passwordText").val() == "")
-                $("#passwordSpan").text("Enter Password");
-            else
-                $("#passwordSpan").text("");
-            //Both fields have values, attempt to login
-            if (($("#usernameText").val() != "") && ($("#passwordText").val() != "")) {
-                login($("#usernameText").val(), $("#passwordText").val());
-            }
-        });
-
-        //Check input areas for errors
-        $("#registerButton").click(function (e) {
-            console.log("register pressed");
-            //Ensure user entered a value
-            if ($("#regUsernameText").val() == "")
-                $("#regUsernameSpan").text("Enter Username");
-            else
-                $("#regUsernameSpan").text("");
-            //Ensure user entered a value
-            if ($("#regPasswordText").val() == "")
-                $("#regPasswordSpan").text("Enter Password");
-            else
-                $("#regPasswordSpan").text("");
-            //Ensure user entered a value
-            if ($("#regRptPasswordText").val() == "")
-                $("#regRptPasswordSpan").text("Retype Password");
-            //Ensure user entered matching passwords
-            else if ($("#regRptPasswordText").val() != $("#regPasswordText").val())
-                $("#regRptPasswordSpan").text("No Match!");
-            //All criteria meet, attept to register
-            else if (($("#regUsernameText").val() != "") && ($("#regPasswordText").val() != "") && ($("#regRptPasswordText").val() != "")) {
-                $("#regRptPasswordSpan").text("");
-                register($("#regUsernameText").val().trim(), $("#regPasswordText").val().trim());
-            }
-        });//End register()
-
         //Go to profile page
         function goToProfile(username) {
             //pass username data along
             window.location.href = "messageDatabase.html" + '#' + username;
         }
+
+        //Functions:
+        //Add: adds a postMessage to database. take sin username, ckeditor data, and date
+        function addPost(userName, msgString, date, title) {
+
+            //Init
+            var transaction = db.transaction(["messages"], "readwrite");
+
+            //Error handling
+            transaction.onerror = function (event) {
+                console.log("Error, Not opened: " + transaction.error + " -> newPost id: " + newPost[0].id +
+                    " -> database size: " + messageData.size);
+            };
+
+            // Init object store
+            var objectStore = transaction.objectStore("messages");
+
+            //Count the database to determin next id
+            var countRequest = objectStore.count();
+            countRequest.onsuccess = function () {
+                console.log(countRequest.result);
+                messageData.size = countRequest.result;
+            }
+
+            //Init and add post
+            if (thread == "")
+                thread = "Master";
+            else if (thread == "Master")
+                thread = title;
+            else
+                thread = thread + "-" + title;
+
+            var newPost = [{ id: messageData.size, userName: userName, msgString: msgString, date: date, thread: thread, title }];
+            var objectStoreRequest = objectStore.add(newPost[0]);
+
+            //Error handling
+            objectStoreRequest.onsuccess = function (event) {
+                console.log("Item added. -> newPost id: " + newPost[0].id + " -> database size: " + messageData.size);
+                messageData.size++;
+                displayPost();
+            };
+            objectStoreRequest.onerror = function (event) {
+                console.log("Item Not Added. Error: " + objectStoreRequest.error + " -> newPost id: " + newPost[0].id + " -> database size: " + messageData.size);
+            };
+        }
+
+        function postMessage() {
+            //Get todays date
+            var today = new Date();
+            //Format it the way we like
+            var dd = today.getDate();
+            var mm = today.getMonth() + 1;
+            var yyyy = today.getFullYear();
+            //capture ckeditor data
+            const editorData = CKEDITOR.instances.editor1.getData();
+            console.log(editorData);
+
+            //addPost with this collected data
+            addPost(("User: " + username), editorData, ("Date Posted: " + (mm + " / " + dd + " / " + yyyy)), $("#titleText").val());
+
+
+        }
+
+        //Deletes the most recent post
+        function deletePost(postId) {
+            //Delete post
+            console.log("Delete")
+            var request = db.transaction(["messages"], "readwrite")
+                .objectStore("messages")
+                .delete(postId);
+
+            //Error handling
+            request.onsuccess = function (event) {
+                console.log("post removed from your database.");
+                messageData.size--;
+                displayPost();
+            };
+            request.onerror = function (event) {
+                console.log("error: " + request.error);
+            };
+
+        }
+
+        // Displays all current database entries in html
+        function displayPost() {
+            //Display each message
+            console.log("Displaying...");
+
+            //Init
+            var transaction = db.transaction(["messages"]);
+            var objectStore = transaction.objectStore("messages");
+            //Remove all content to post it with changes
+            $("#threadArea").empty();
+            objectStore.openCursor().onsuccess = function (event) {
+
+                //Use cursor to cycle all entries, displaying each one in a lisr
+                if (cursor) {
+                var listItem = document.getElementById(cursor.value.thread).createElement(cursor.value.thread + "-" + cursor.value.title);
+                    //This is our post, passing the post id to the delete button for each post
+                    listItem.innerHTML =
+                        cursor.value.userName
+                        + "<br>"
+                        + cursor.value.thread + "/" + cursor.value.title
+                        + "<br>"
+                        + cursor.value.msgString
+                        + "<br>"
+                        + cursor.value.date
+                        + "<br>"
+                        + "<button onclick='deletePost("
+                        + cursor.value.id
+                        + ") '>delete Post</button>"
+                        + "<br><br>";
+                    //add these appendages to the html
+                $(cursor.value.thread + "-" + cursor.value.title).append(listItem);
+                    cursor.continue();
+                } else {
+                    console.log('all Entries displayed.');
+                }
+            };
+        }
+
+
+        function cascadePosts() {
+            var acc = document.getElementsByClassName("post");
+
+            var i;
+
+            for (i = 0; i < acc.length; i++) {
+                acc[i].addEventListener("click", function () {
+                    this.classList.toggle("active");
+                    var panel = this.nextElementSibling;
+                    if (panel.style.maxHeight) {
+                        panel.style.maxHeight = null;
+                    } else {
+                        panel.style.maxHeight = panel.scrollHeight + "px";
+                    }
+                });
+            }
+        }// End cascadePosts
+
+
     </script> <!--End Script-->
+    <!--Button used-->
+    <button onclick="postMessage()">Post Message</button>
 </body>
 </html>
+
