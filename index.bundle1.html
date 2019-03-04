@@ -481,6 +481,7 @@
             toggleElement("threads");
             userLoggedIn = username;
             console.log("Toggling threads, user logged in: " + username);
+            displayPost();
 
         }
         function openCkeditor() {
@@ -629,9 +630,9 @@
                             + "<button onclick='editPost("
                             + cursor.value.id
                             + ") '>Edit Post</button>"
-                            + "<button onclick='deletePost("
-                            + cursor.value.msgString
-                            + ") '>Delete Post</button>"
+                        + "<button onclick='deletePost("
+                            + cursor.value.id
+                        + ") '>Delete Post</button>"
                             + "<br><br>";
                         //add these appendages to the html
                         $("#threadArea").append(listItem);
