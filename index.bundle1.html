@@ -34,18 +34,19 @@
 
 <html lang="en">
 <head>
-    <!--Responsive viewpoint-->
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!--Responsive viewpoint
+    <meta name="viewport" content="width=device-width, initial-scale=1">-->
     <!--ckeditor resourses-->
     <script src="Resources/ckeditor_4.11.2_basic/ckeditor.js"></script>
     <!-- Bootstrap requires these Libraries -->
     <script src="Resources/jquery.3.3.1/jquery.min.js"></script>
     <script src="Resources/bootstrap-4.1.3-dist/js/popper.min.js"></script>
+    <!-- Bootstrap JS Library -->
+    <script src="Resources/bootstrap-4.1.3-dist/js/bootstrap.min.js"></script>
     <!-- Bootstrap style sheet -->
     <link rel="stylesheet" href="Resources/bootstrap-4.1.3-dist/css/bootstrap.min.css">
-    <!--Unicode content-->
-    <meta http-equiv="Content-Type" content="text/html; charset = utf-8" />
-
+    <!--Unicode content
+    <meta http-equiv="Content-Type" content="text/html; charset = utf-8" />-->
     <!--Sets page title-->
     <title>Allen Jones - WebDeveloperTestingProject</title>
 </head>
@@ -205,15 +206,20 @@
                     <input type="text" id="titleText" placeholder="Title" />
                     <span class="close">&times;</span>
                     <script>CKEDITOR.replace('editor1');</script>
+                    <!--Button used-->
+                    <button onclick="postMessageButton()"type='button'>Post Message</button>
                 </form>
 
             </div>
         </div>
         <div id="threads">
+            <h1>Welcome! Please, create a thread.</h1>
+            <button onclick="openCkeditor()">Start Thread</button>
             <div class="messages">
-                <!--The area of html that will be appended when a post is displayed-->
+
                 <div class="container">
                     <div class="card">
+                        <!--The area of html that will be appended when a post is displayed-->
                         <div id="threadArea"></div>
                     </div>
                 </div>
@@ -226,8 +232,107 @@
     <!-- Your application javascript --------------------------------------->
     <script type="text/javascript">
 
-        Init()
+        console.log("Initializing...");
+        //test implementation prefixes
+        window.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+        window.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction;
+        window.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange
+
+        //Unsupported browser
+        if (!window.indexedDB) {
+            window.console.log("Your browser doesn't support a stable version of IndexedDB.")
+        }
+
+        //declare database for database1 and open
+        var database = [];
+        var data;
+        var request = window.indexedDB.open("database1", 1);
+        var thread = "";
+        var userLoggedIn = "";
+        var usersStoreSize = 0;
+        var messagesStoreSize = 0;
+        console.log("Database init started");
+        //usersStoreSize = 0;
+        //error handling
+        request.onerror = function (event) {
+            console.log("error: " + request.error);
+        };
+
+        request.onsuccess = function (event) {
+            data = request.result;
+            console.log("data successfully init...")
+
+        };
+        //check for upgrades, a new databse is created
+        request.onupgradeneeded = function (event) {
+            console.log("database upgrading...");
+
+            //Create Object Store
+            data = event.target.result;
+            var userObjectStore = data.createObjectStore("users", { keyPath: "username" });
+            //Count the users store to determin next id
+            var userCountRequest = userObjectStore.count();
+            userCountRequest.onsuccess = function () {
+                console.log(userCountRequest.result);
+                usersStoreSize = userCountRequest.result;
+            }
+            var messageObjectStore = data.createObjectStore("messages", { keyPath: "id" });
+            //Count the users store to determin next id
+            var messageCountRequest = messageObjectStore.count();
+            messageCountRequest.onsuccess = function () {
+                console.log(messageCountRequest.result);
+                messagesStoreSize = messageCountRequest.result;
+            }
+        }
+        /*absorbed by database1
+        //Declare database for database1 and open
+        var messageData = [];
+        var data;
+
+        var request = window.indexedDB.open("messages", 1);
+        //Error handling
+        request.onerror = function (event) {
+            console.log("error: " + request.error);
+        };
+        
+
+
+        //Successful open of database, set it and open object store
+        request.onsuccess = function (event) {
+            var data = request.result;
+            var transaction = data.transaction("messages");
+            var objectStore = transaction.objectStore("messages");
+            console.log("data success: " + data);
+            //Count the database to determin next id
+            var countRequest = objectStore.count();
+            countRequest.onsuccess = function () {
+                console.log(countRequest.result);
+                messagesStoreSize = countRequest.result;
+            }
+            //reset pastarea element so that existing posts appear on page load
+            displayPost();
+        };
+        //Init database in memory
+        request.onupgradeneeded = function (event) {
+            console.log("data Upgrading... ");
+            var data = event.target.result;
+            var objectStore = db.createObjectStore("messages", { keyPath: "id" });
+
+        }
+*/
+        //hide loading images
+        $("#loadingImg").hide();
+        $("#regLoadingImg").hide();
+
+        var ckeditorDefaultText =
+            "Create your message here. Push 'Post Button' to post it and have it displayed. All user messages go here, and can be deleted individually. This data will persist after the browser is closed."
+
+        toggleElement("ckeditor");
+        toggleElement("threads");
+        toggleElement("error page");
+            //toggleElement();
         UserInput()
+        console.log("user input called");
 
         //Functions:
 
@@ -280,102 +385,17 @@
         }
 
         function Init() {
-            console.log("Initializing...");
-            //test implementation prefixes
-            window.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
-            window.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction;
-            window.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange
+            
 
-            //Unsupported browser
-            if (!window.indexedDB) {
-                window.console.log("Your browser doesn't support a stable version of IndexedDB.")
-            }
-
-            //declare database for users and open
-            var userData = [];
-            var data;
-            var request = window.indexedDB.open("users", 1);
-            var thread = "";
-            var username = window.location.hash.substring(1)
-
-            //userData.size = 0;
-            //error handling
-            request.onerror = function (event) {
-                console.log("error: " + request.error);
-            };
-            request.onsuccess = function (event) {
-                var data = request.result;
-                console.log("data successfully init...")
-
-            };
-            //check for upgrades, a new databse is created
-            request.onupgradeneeded = function (event) {
-                console.log("data upgrading...");
-
-                //Create Object Store
-                var data = event.target.result;
-                var objectStore = data.createObjectStore("users", { keyPath: "username" });
-                //Count the database to determin next id
-                var countRequest = objectStore.count();
-                countRequest.onsuccess = function () {
-                    console.log(countRequest.result);
-                    userData.size = countRequest.result;
-                }
-            }
-
-            //Declare database for users and open
-            var messageData = [];
-            var db;
-
-            openDb();
-            //Init database in memory
-            request.onupgradeneeded = function (event) {
-                console.log("db Upgrading... ");
-                var db = event.target.result;
-                var objectStore = db.createObjectStore("messages", { keyPath: "id" });
-
-            }
-
-            //hide loading images
-            $("#loadingImg").hide();
-            $("#regLoadingImg").hide();
-
-            var ckeditorDefaultText =
-                "Create your message here. Push 'Post Button' to post it and have it displayed. All user messages go here, and can be deleted individually. This data will persist after the browser is closed."
-
-            toggleElement("ckeditor");
-            toggleElement("threads");
-            toggleElement("error page");
-            //toggleElement();
         }
-
+        /*
         function openDb() {
-            var request = window.indexedDB.open("messages", 1);
-            //Error handling
-            request.onerror = function (event) {
-                console.log("error: " + request.error);
-            };
 
-            //Successful open of database, set it and open object store
-            request.onsuccess = function (event) {
-                var db = request.result;
-                //reset pastarea element so that existing posts appear on page load
-                displayPost();
-                var transaction = db.transaction("messages");
-                var objectStore = transaction.objectStore("messages");
-                console.log("db success: " + db);
-                //Count the database to determin next id
-                var countRequest = objectStore.count();
-                countRequest.onsuccess = function () {
-                    console.log(countRequest.result);
-                    messageData.size = countRequest.result;
-                }
-            };
-
-        }
+        }*/
 
         //Create new account, add user input to database
         function register(username, password) {
+            console.log("register user started");
 
             //Init
             var transaction = data.transaction(["users"], "readwrite");
@@ -383,29 +403,31 @@
             //Error handling
             transaction.onerror = function (event) {
                 console.log("Error, Not opened: " + transaction.error +
-                    " -> newItem id: " + newUser[0].id + " -> database size: " + userData.size);
+                    " -> newItem id: " + newUser[0].id + " -> database size: " + usersStoreSize);
             };
             //Init Object Store of
             var objectStore = transaction.objectStore("users");
+            console.log("user store open requested");
 
             //Count the database to determin next id
             var countRequest = objectStore.count();
             countRequest.onsuccess = function () {
                 console.log(countRequest.result);
-                userData.size = countRequest.result;
+                usersStoreSize = countRequest.result;
             }
 
             //Init and add new user
-            var newUser = [{ username: username, id: userData.size, password: password }];
+            var newUser = [{ username: username, id: usersStoreSize, password: password }];
             var objectStoreRequest = objectStore.add(newUser[0]);
+            console.log("add requested");
 
             //Error handling
             objectStoreRequest.onsuccess = function (event) {
-                console.log("User added. -> newItem id: " + newUser[0].id + " -> database size: " + userData.size);
+                console.log("User added. -> newItem id: " + newUser[0].id + " -> database size: " + usersStoreSize);
                 $("#regErrorSpan").text("Registration successful! ");
                 //$("#regLoadingImg").show();
                 //setTimeout(refresh(), 2);
-                userData.size++;
+                usersStoreSize++;
             };
             objectStoreRequest.onerror = function (event) {
                 $("#regErrorSpan").text(objectStoreRequest.error);
@@ -414,10 +436,13 @@
 
         //Login to existing account, search database for user input
         function login(username, password) {
+            console.log("user login started");
+
             //Init database to reference
             var transaction = data.transaction(["users"]);
             var objectStore = transaction.objectStore("users");
             var request = objectStore.get(username);
+            console.log("attempting to get username: " + username);
 
             //Successful find of username
             request.onsuccess = function (event) {
@@ -426,9 +451,12 @@
                     if (request.result.password === password) {
                         $("#loadingImg").show();
                         setTimeout(goToProfile(username), 1500);
+                        console.log("proceeding to profile");
+
                     }
                     else {
                         //No match to databse
+
                         $("#errorSpan").text("Incorrect Password");
                     }
                 }
@@ -450,29 +478,50 @@
         //Go to profile page
         function goToProfile(username) {
             //pass username data along
-            window.location.href = "messageDatabase.html" + '#' + username;
+            toggleElement("threads");
+            userLoggedIn = username;
+            console.log("Toggling threads, user logged in: " + username);
+
+        }
+        function openCkeditor() {
+            //pass username data along
+            console.log("opening ckeditor");
+
+            renderCkeditor("");
+
         }
 
-        //Add: adds a postMessage to database. take sin username, ckeditor data, and date
+        function renderCkeditor(ckeditorText) {
+            toggleElement("ckeditor");
+            console.log("toggling ckeditor");
+
+            //$("#editor1").empty();
+            //$("#editor1").append(ckeditorText);
+        }
+
+        //Add: adds a postMessageButton to database. take sin username, ckeditor data, and date
         function addPost(userName, msgString, date, title) {
 
+            console.log("addpost beginning");
+
             //Init
-            var transaction = db.transaction(["messages"], "readwrite");
+            var transaction = data.transaction(["messages"], "readwrite");
 
             //Error handling
             transaction.onerror = function (event) {
                 console.log("Error, Not opened: " + transaction.error + " -> newPost id: " + newPost[0].id +
-                    " -> database size: " + messageData.size);
+                    " -> database size: " + messagesStoreSize);
             };
 
             // Init object store
             var objectStore = transaction.objectStore("messages");
+            console.log("opening object store");
 
             //Count the database to determin next id
             var countRequest = objectStore.count();
             countRequest.onsuccess = function () {
                 console.log(countRequest.result);
-                messageData.size = countRequest.result;
+                messagesStoreSize = countRequest.result;
             }
 
             //Init and add post
@@ -483,21 +532,28 @@
             else
                 thread = thread + "-" + title;
 
-            var newPost = [{ id: messageData.size, userName: userName, msgString: msgString, date: date, thread: thread, title }];
-            var objectStoreRequest = objectStore.put(newPost[0]);
-            objectStore.
+            console.log("set thread to: " + thread);
+
+
+            var newPost = [{ id: messagesStoreSize, userName: userName, msgString: msgString, date: date, thread: thread, title: title }];
+            var objectStoreRequest = objectStore.add(newPost[0]);
+            console.log("attepting to add");
+
+            //objectStore.
             //Error handling
             objectStoreRequest.onsuccess = function (event) {
-                console.log("Item added. -> newPost id: " + newPost[0].id + " -> database size: " + messageData.size);
-                messageData.size++;
+                console.log("Item added. -> newPost id: " + newPost[0].id + " -> database size: " + messagesStoreSize);
+                messagesStoreSize++;
                 displayPost();
             };
             objectStoreRequest.onerror = function (event) {
-                console.log("Item Not Added. Error: " + objectStoreRequest.error + " -> newPost id: " + newPost[0].id + " -> database size: " + messageData.size);
+                console.log("Item Not Added. Error: " + objectStoreRequest.error + " -> newPost id: " + newPost[0].id + " -> database size: " + messagesStoreSize);
             };
         }
 
-        function postMessage() {
+        function postMessageButton() {
+            console.log("post message button pressed");
+
             //Get todays date
             var today = new Date();
             //Format it the way we like
@@ -509,27 +565,29 @@
             console.log(editorData);
 
             //addPost with this collected data
-            addPost(("User: " + username), editorData, ("Date Posted: " + (mm + " / " + dd + " / " + yyyy)), $("#titleText").val());
+            addPost(("User: " + userLoggedIn), editorData, ("Date Posted: " + (mm + " / " + dd + " / " + yyyy)), $("#titleText").val());
 
 
         }
 
         function editPost(ckeditorText) {
             renderCkeditor(ckeditorText);
+            console.log("rendering ckeditor for edit");
+
         }
 
         //Deletes the most recent post
         function deletePost(postId) {
             //Delete post
             console.log("Delete")
-            var request = db.transaction(["messages"], "readwrite")
+            var request = data.transaction(["messages"], "readwrite")
                 .objectStore("messages")
                 .delete(postId);
 
             //Error handling
             request.onsuccess = function (event) {
                 console.log("post removed from your database.");
-                messageData.size--;
+                messagesStoreSize--;
                 displayPost();
             };
             request.onerror = function (event) {
@@ -542,43 +600,47 @@
         function displayPost() {
             //Display each message
             console.log("Displaying...");
-            openDb();
-            //Init
-            var transaction = db.transaction(["messages"]);
-            var objectStore = transaction.objectStore("messages");
-            //Remove all content to post it with changes
-            $("#threadArea").empty();
-            objectStore.openCursor().onsuccess = function (event) {
+           // var request = window.indexedDB.open("messages", 1);
+            //request.onsuccess = function (event) {
 
-                //Use cursor to cycle all entries, displaying each one in a lisr
-                if (cursor) {
-                    console.log("cursor active..." + cursor.value.id);
+                //Init
+                var transaction = data.transaction(["messages"]);
+                var objectStore = transaction.objectStore("messages");
+                //Remove all content to post it with changes
+                $("#threadArea").empty();
+                objectStore.openCursor().onsuccess = function (event) {
 
-                    var listItem = document.getElementById(cursor.value.thread).createElement(cursor.value.thread + "-" + cursor.value.title);
-                    //This is our post, passing the post id to the delete button for each post
-                    listItem.innerHTML =
-                        cursor.value.userName
-                        + "<br>"
-                        + cursor.value.thread + "/" + cursor.value.title
-                        + "<br>"
-                        + cursor.value.msgString
-                        + "<br>"
-                        + cursor.value.date
-                        + "<br>"
-                        + "<button onclick='editPost("
-                        + cursor.value.id
-                        + ") '>Edit Post</button>"
-                        + "<button onclick='deletePost("
-                        + cursor.value.msgString
-                        + ") '>Delete Post</button>"
-                        + "<br><br>";
-                    //add these appendages to the html
-                    $(cursor.value.thread + "-" + cursor.value.title).append(listItem);
-                    cursor.continue();
-                } else {
-                    console.log('all Entries displayed.');
-                }
-            };
+                    //Use cursor to cycle all entries, displaying each one in a lisr
+                    var cursor = event.target.result;
+                    if (cursor) {
+                        console.log("cursor active..." + cursor.value.id);
+
+                        var listItem = document.createElement("li");
+                        //This is our post, passing the post id to the delete button for each post
+                        listItem.innerHTML =
+                            cursor.value.userName
+                            + "<br>"
+                            + cursor.value.thread// + "/" + cursor.value.title
+                            + "<br>"
+                            + cursor.value.msgString
+                            + "<br>"
+                            + cursor.value.date
+                            + "<br>"
+                            + "<button onclick='editPost("
+                            + cursor.value.id
+                            + ") '>Edit Post</button>"
+                            + "<button onclick='deletePost("
+                            + cursor.value.msgString
+                            + ") '>Delete Post</button>"
+                            + "<br><br>";
+                        //add these appendages to the html
+                        $("#threadArea").append(listItem);
+                        cursor.continue();
+                    } else {
+                        console.log('all Entries displayed.');
+                    }
+                };
+           // }
         }
 
         function initCascadePosts() {
@@ -607,7 +669,7 @@
                 targetElement.style.display = "none";
             }
         }
-
+        /*broken
         $(function () {
             /*
             checkboxes.click(function () {
@@ -628,7 +690,7 @@
                 $(window).trigger('hashchange');
             });*/
 
-            $(window).on('hashchange', function () {
+            /*$(window).on('hashchange', function () {
                 // On every hash change the render function is called with the new hash.
                 // This is how the navigation of our app happens.
                 render(decodeURI(window.location.hash));
@@ -683,7 +745,7 @@
                         renderFilterResults(filters, products);
                     }*/
 
-                };
+               /* };
 
                 // Execute the needed function depending on the url keyword (stored in temp).
                 if (map[temp]) {
@@ -719,7 +781,7 @@
                         }
                     });
                 }
-                */
+                
                 // Show the page.
                 if (ckeditorText!="")
                     container.append(ckeditorText);
@@ -734,10 +796,8 @@
                 var page = $('.error');
                 page.addClass('visible');
             }
-        });
+        });*/
     </script> <!--End Script-->
-    <!--Button used-->
-    <button onclick="postMessage()">Post Message</button>
 </body>
 </html>
 
