@@ -60,7 +60,6 @@
                 <!--Login, Register Buttons, assigned to open Modals-->
                 <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#loginModal">Log In</button>
                 <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#registerModal">Register</button>
-
                 <!--Login Modal-->
                 <div id="loginModal" class="modal fade" role="dialog">
                     <div class="modal-dialog">
@@ -70,7 +69,7 @@
                                 <button type="button" class="close" data-dismiss="modal">&times;</button>
                                 <button type="button" class="register" data-target="#registerModal">&times;</button>
                                 <!--User instructions-->
-                                <h4 calss="modal-title">Log in, or create an account.</h4>
+                                <h4 class="modal-title">Log in, or create an account.</h4>
                             </div>  <!--End modal-header-->
                             <div class="modal-body">
                                 <!--Neatly display login forms-->
@@ -194,27 +193,49 @@
                         </div>      <!--End "modal-content"-->
                     </div>          <!--End "modal-dialog-->
                 </div>              <!--End "modal-Modal-->
+                <div id="ckModal" class="modal fade" role="dialog">
+                    <!--ck Modal-->
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <!--Greet user with instructions and offer close and register buttons-->
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                <button type="button" class="postMessage" data-target="#registerModal">&times;</button>
+                                <!--User instructions-->
+                                <h4 class="modal-title">Type your message here.</h4>
+                            </div>  <!--End modal-header-->
+                            <div class="modal-body">
+                                <!--Neatly display login forms-->
+                                <div class="ckcontent">
+                                    <form>
+                                        <textarea name="editor1" id="editor1" rows="10" cols="80"> </textarea>
+                                        <input type="text" id="titleText" placeholder="Title" />
+                                        <span class="close">&times;</span>
+                                        <script>CKEDITOR.replace('editor1');</script>
+                                        <!--Button used-->
+                                        <button onclick="postMessageButton()" data-dismiss="modal" type='button'>Post Message</button>
+                                    </form>
+
+                                </div>
+                            </div>  <!--End "modal-body"-->
+                            <div class="modal-footer">
+                                <!--close button for login Modal-->
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            </div>  <!--End "modal-footer"-->
+                        </div>      <!--End "modal-content"-->
+                    </div>          <!--End "modal-dialog"-->
+                </div>              <!--End "ck modal"-->
             </div>                  <!--End "container"-->
         </div>                      <!--End "welcome page:-->
         <div id="ckeditor">
             <!--The area that is replaced by ckeditor-->
             <div class="overlay"></div>
 
-            <div class="ckcontent">
-                <form>
-                    <textarea name="editor1" id="editor1" rows="10" cols="80"> </textarea>
-                    <input type="text" id="titleText" placeholder="Title" />
-                    <span class="close">&times;</span>
-                    <script>CKEDITOR.replace('editor1');</script>
-                    <!--Button used-->
-                    <button onclick="postMessageButton()"type='button'>Post Message</button>
-                </form>
-
-            </div>
         </div>
         <div id="threads">
             <h1>Welcome! Please, create a thread.</h1>
-            <button onclick="openCkeditor()">Start Thread</button>
+            <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#ckModal">Start Thread</button>
+
             <div class="messages">
 
                 <div class="container">
@@ -251,6 +272,7 @@
         var userLoggedIn = "";
         var usersStoreSize = 0;
         var messagesStoreSize = 0;
+        var editId = -1;
         console.log("Database init started");
         //usersStoreSize = 0;
         //error handling
@@ -327,7 +349,7 @@
         var ckeditorDefaultText =
             "Create your message here. Push 'Post Button' to post it and have it displayed. All user messages go here, and can be deleted individually. This data will persist after the browser is closed."
 
-        toggleElement("ckeditor");
+        //toggleElement("ckeditor");
         toggleElement("threads");
         toggleElement("error page");
             //toggleElement();
@@ -484,16 +506,16 @@
             displayPost();
 
         }
-        function openCkeditor() {
+        function openCkeditor(postId) {
             //pass username data along
             console.log("opening ckeditor");
-
+            editId = postId;
             renderCkeditor("");
 
         }
 
         function renderCkeditor(ckeditorText) {
-            toggleElement("ckeditor");
+            //toggleElement("ckeditor");
             console.log("toggling ckeditor");
 
             //$("#editor1").empty();
@@ -504,6 +526,7 @@
         function addPost(userName, msgString, date, title) {
 
             console.log("addpost beginning");
+
 
             //Init
             var transaction = data.transaction(["messages"], "readwrite");
@@ -535,21 +558,56 @@
 
             console.log("set thread to: " + thread);
 
+            if (editId == -1) {
+                var newPost = [{
+                    id: messagesStoreSize,
+                    userName: userName,
+                    msgString: msgString,
+                    date: date,
+                    thread: thread,
+                    title: title
+                }];
+                var objectStoreRequest = objectStore.put(newPost[0]);
+                console.log("attepting to add new post");
 
-            var newPost = [{ id: messagesStoreSize, userName: userName, msgString: msgString, date: date, thread: thread, title: title }];
-            var objectStoreRequest = objectStore.add(newPost[0]);
-            console.log("attepting to add");
+                //objectStore.
+                //Error handling dcc
+                objectStoreRequest.onsuccess = function (event) {
+                    console.log("Item added. -> newPost id: " + newPost[0].id + " -> database size: " + messagesStoreSize);
+                    messagesStoreSize++;
+                    displayPost();
+                };
+                objectStoreRequest.onerror = function (event) {
+                    console.log("Item Not Added. Error: " + objectStoreRequest.error + " -> newPost id: " + newPost[0].id + " -> database size: " + messagesStoreSize);
+                };
+            }
+            else {
+                var transaction = data.transaction(["messages"], "readwrite");
+                var request = objectStore.get(editId);
+                request.onsuccess = function (event) {
 
-            //objectStore.
-            //Error handling
-            objectStoreRequest.onsuccess = function (event) {
-                console.log("Item added. -> newPost id: " + newPost[0].id + " -> database size: " + messagesStoreSize);
-                messagesStoreSize++;
-                displayPost();
-            };
-            objectStoreRequest.onerror = function (event) {
-                console.log("Item Not Added. Error: " + objectStoreRequest.error + " -> newPost id: " + newPost[0].id + " -> database size: " + messagesStoreSize);
-            };
+                    var post = request.result;
+                    post.msgString = msgString
+                    var newPost = [post];
+                    editId = -1;
+
+                    var objectStoreRequest = objectStore.put(newPost[0]);
+                    console.log("attepting to edit existing post");
+
+                    //objectStore.
+                    //Error handling dcc
+                    objectStoreRequest.onsuccess = function (event) {
+                        console.log("Item edited. -> newPost id: " + newPost[0].id + " -> database size: " + messagesStoreSize);
+                        messagesStoreSize++;
+                        displayPost();
+                    };
+                    objectStoreRequest.onerror = function (event) {
+                        console.log("Item Not edited. Error: " + objectStoreRequest.error + " -> newPost id: " + newPost[0].id + " -> database size: " + messagesStoreSize);
+                    };
+
+                }
+            }
+
         }
 
         function postMessageButton() {
@@ -572,6 +630,7 @@
         }
 
         function editPost(ckeditorText) {
+
             renderCkeditor(ckeditorText);
             console.log("rendering ckeditor for edit");
 
@@ -617,22 +676,22 @@
                         console.log("cursor active..." + cursor.value.id);
 
                         var listItem = document.createElement("li");
-                        //This is our post, passing the post id to the delete button for each post
+                        //This is our post, passing the post to the delete button for each post
                         listItem.innerHTML =
                             cursor.value.userName
                             + "<br>"
-                            + cursor.value.thread// + "/" + cursor.value.title
+                            + cursor.value.thread + "/" + cursor.value.title
                             + "<br>"
                             + cursor.value.msgString
                             + "<br>"
                             + cursor.value.date
                             + "<br>"
-                            + "<button onclick='editPost("
+                            + "<button type = 'button' onclick = 'openCkeditor("
                             + cursor.value.id
-                            + ") '>Edit Post</button>"
-                        + "<button onclick='deletePost("
+                            + ") ' class='btn btn-info btn-lg' data-toggle='modal' data-target='#ckModal' > Edit Post</button >"
+                            + "<button onclick='deletePost("
                             + cursor.value.id
-                        + ") '>Delete Post</button>"
+                            + ") ' >Delete Post</button>"
                             + "<br><br>";
                         //add these appendages to the html
                         $("#threadArea").append(listItem);
