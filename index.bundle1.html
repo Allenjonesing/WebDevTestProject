@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
-<!--SPA for Wed Developer Testing Project.
+<!--SPA for Web Developer Testing Project.
     Prepared by Allen Jones
-    Uses Bootstrap Modals for login and register forms
+    Uses Bootstrap Modals for login, register, and ckeditor forms
     Adds input data from registration into indexed database
     References database for password check, proceeds to profile page
 
@@ -13,13 +13,18 @@
         Resources
 
     html body:
-        Welcome screen/header(persistant thropugh pages)
-        ckeditor area
-        Message area (includes edit post area)
+        Welcome screen/header
+            Login modal
+            Register modal
+            ckeditor modal
+        Message area
             created elements for threads
                 Created area for replies
+        Error area
 
     Javascript Functions
+    UserInput - Takes user input from the modals and calls the functions
+
     Register - Takes user input for username and password
     adds info to indexed database, handles errors
 
@@ -27,9 +32,30 @@
     attempts to reference input password with database entry matching username
     this poses security risks, allowing password to be viewed in debugging.
 
-    goToProfile - Sends user to the messageDatabase.html and passes their username along
+    goToProfile - Enambles the messages element
 
-    ''
+    openEdit - Opens ckeditor for editing an existing post, passing id along
+    to updatate the database
+
+    openReply - opens ckeditor for a reply, passing the thread and title to
+    create a new element for the purpose of collapsing
+
+    addPost - Intakes username, ckeditor data, the current date, and the title
+    and adds this info to the IDB. The database is counted to determine the next
+    id number.
+
+    postMessageButton - The function for the Post Message Button. Calls addPost
+    to add the ckeditor data to the database. THen calls displayPost to reset
+    the posts on screen
+
+    deletePost - Intakes the post id from the delete post button and deletes the
+    appropriate post. Then calls displayPost to reset the posts on screen
+
+    displayPost - Removes all content in the postarea element, then appends all
+    posts through the database using a cursor.
+
+    initCascadePosts - takes the post's thread and title to collapse the thread 
+    into a button to expand them again.'
     -->
 
 <html lang="en">
@@ -65,9 +91,8 @@
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <!--Greet user with instructions and offer close and register buttons-->
+                                <!--Greet user with instructions and offer close buttons-->
                                 <button type="button" class="close" data-dismiss="modal">&times;</button>
-                                <button type="button" class="register" data-target="#registerModal">&times;</button>
                                 <!--User instructions-->
                                 <h4 class="modal-title">Log in, or create an account.</h4>
                             </div>  <!--End modal-header-->
@@ -192,15 +217,14 @@
                             </div>  <!--End "Modal-footer-->
                         </div>      <!--End "modal-content"-->
                     </div>          <!--End "modal-dialog-->
-                </div>              <!--End "modal-Modal-->
+                </div>              <!--End "register-Modal-->
                 <div id="ckModal" class="modal fade" role="dialog">
                     <!--ck Modal-->
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <!--Greet user with instructions and offer close and register buttons-->
+                                <!--Greet user with instructions and offer close buttons-->
                                 <button type="button" class="close" data-dismiss="modal">&times;</button>
-                                <button type="button" class="postMessage" data-target="#registerModal">&times;</button>
                                 <!--User instructions-->
                                 <h4 class="modal-title">Type your message here.</h4>
                             </div>  <!--End modal-header-->
@@ -208,6 +232,7 @@
                                 <!--Neatly display login forms-->
                                 <div class="ckcontent">
                                     <form>
+                                        <!--the area that ckeditor will occupy-->
                                         <textarea name="editor1" id="editor1" rows="10" cols="80"> </textarea>
                                         <input type="text" id="titleText" placeholder="Title" />
                                         <span class="close">&times;</span>
@@ -227,11 +252,7 @@
                 </div>              <!--End "ck modal"-->
             </div>                  <!--End "container"-->
         </div>                      <!--End "welcome page:-->
-        <div id="ckeditor">
-            <!--The area that is replaced by ckeditor-->
-            <div class="overlay"></div>
-
-        </div>
+        <!--The area where messages are displayed-->
         <div id="threads">
             <h1>Welcome! Please, create a thread.</h1>
             <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#ckModal">Start Thread</button>
@@ -246,6 +267,7 @@
                 </div>
             </div>
         </div>
+        <!--Error page-->
         <div id="error page">
             <h3>Sorry, something went wrong :(</h3>
         </div>
@@ -275,7 +297,6 @@
         var editId = -1;
         var replyTitle = "threadArea";
         console.log("Database init started");
-        //usersStoreSize = 0;
         //error handling
         request.onerror = function (event) {
             console.log("error: " + request.error);
@@ -307,58 +328,25 @@
                 messagesStoreSize = messageCountRequest.result;
             }
         }
-        /*absorbed by database1
-        //Declare database for database1 and open
-        var messageData = [];
-        var data;
-
-        var request = window.indexedDB.open("messages", 1);
-        //Error handling
-        request.onerror = function (event) {
-            console.log("error: " + request.error);
-        };
-        
-
-
-        //Successful open of database, set it and open object store
-        request.onsuccess = function (event) {
-            var data = request.result;
-            var transaction = data.transaction("messages");
-            var objectStore = transaction.objectStore("messages");
-            console.log("data success: " + data);
-            //Count the database to determin next id
-            var countRequest = objectStore.count();
-            countRequest.onsuccess = function () {
-                console.log(countRequest.result);
-                messagesStoreSize = countRequest.result;
-            }
-            //reset pastarea element so that existing posts appear on page load
-            displayPost();
-        };
-        //Init database in memory
-        request.onupgradeneeded = function (event) {
-            console.log("data Upgrading... ");
-            var data = event.target.result;
-            var objectStore = db.createObjectStore("messages", { keyPath: "id" });
-
-        }
-*/
         //hide loading images
         $("#loadingImg").hide();
         $("#regLoadingImg").hide();
 
+        //Set default text for the ckeditor window
         var ckeditorDefaultText =
             "Create your message here. Push 'Post Button' to post it and have it displayed. All user messages go here, and can be deleted individually. This data will persist after the browser is closed."
 
         //toggleElement("ckeditor");
         toggleElement("threads");
         toggleElement("error page");
-            //toggleElement();
+        //toggleElement();
         UserInput()
         console.log("user input called");
 
         //Functions:
 
+        //collect user input
+        //No input or returns
         function UserInput() {
             //Check input areas for errors
             $("#loginButton").click(function (e) {
@@ -405,18 +393,10 @@
                 }
             });//End register()
 
-        }
-
-        function Init() {
-            
-
-        }
-        /*
-        function openDb() {
-
-        }*/
+        }//End userInput()
 
         //Create new account, add user input to database
+        //Inputs: username and password the user entered
         function register(username, password) {
             console.log("register user started");
 
@@ -448,8 +428,8 @@
             objectStoreRequest.onsuccess = function (event) {
                 console.log("User added. -> newItem id: " + newUser[0].id + " -> database size: " + usersStoreSize);
                 $("#regErrorSpan").text("Registration successful! ");
-                //$("#regLoadingImg").show();
-                //setTimeout(refresh(), 2);
+                $("#loadingImg").show();
+                setTimeout($("#loadingImg").show(), 3000);
                 usersStoreSize++;
             };
             objectStoreRequest.onerror = function (event) {
@@ -458,6 +438,7 @@
         } //End Register()
 
         //Login to existing account, search database for user input
+        //Inputs: username and password the user entered
         function login(username, password) {
             console.log("user login started");
 
@@ -473,13 +454,12 @@
                     //Check password using strict compare
                     if (request.result.password === password) {
                         $("#loadingImg").show();
-                        setTimeout(goToProfile(username), 1500);
+                        setTimeout($("#loadingImg").show(), 3000);
+                        goToProfile(username);
                         console.log("proceeding to profile");
-
                     }
                     else {
                         //No match to databse
-
                         $("#errorSpan").text("Incorrect Password");
                     }
                 }
@@ -487,11 +467,8 @@
                     //No match for username
                     $("#errorSpan").text("Username not found");
                     console.log("ERROR, wrong username")
-
                 }
-
             };
-
             //Error handling
             request.onerror = function (event) {
                 $("#ErrorSpan").text("error: " + request.error);
@@ -499,48 +476,38 @@
         }//End Login()
 
         //Go to profile page
+        //inputs username to pass to posts
         function goToProfile(username) {
             //pass username data along
             toggleElement("threads");
             userLoggedIn = username;
             console.log("Toggling threads, user logged in: " + username);
+            //Display existing posts from memory
             displayPost();
 
-        }
-        function openEdit(postId, postMsgString, postTitle) {
-            //pass username data along
+        }//End goToProfile()
+
+        //Open the editor to edit a post
+        //inputs postid to update the database, postMessageString to input into the editor(so the user doesnt start over),
+        function openEdit(postId, postMsgString) {
             console.log("opening ckeditor");
             editId = postId;
-            replyTitle = postTitle;
-            renderCkeditor(postMsgString);
 
-        }
+        }//End openEdit()
+
+        //Open the editor to post a reply
+        //inputs postid to update the database, postMessageString to input into the editor(so the user doesnt start over),
+        //and post Title to create the new element
         function openReply(postId, postMsgString, postTitle) {
-            //pass username data along
             console.log("opening ckeditor");
-            //editId = postId;
-            thread = thread+postTitle;
-            renderCkeditor(postMsgString);
+            thread = thread + postTitle;
 
         }
 
-        function renderCkeditor(ckeditorText) {
-            //toggleElement("ckeditor");
-            console.log("toggling ckeditor");
-
-            //$("#editor1").empty();
-            //$("#editor1").append(ckeditorText);
-        }
-
-        function expandPost(postThread, postTitle) {
-            initCascadePosts(postThread, postTitle);
-        }
-
-        //Add: adds a postMessageButton to database. take sin username, ckeditor data, and date
+        //Adds a post to the database. 
+        //inputs username, ckeditor data, date, and title.
         function addPost(userName, msgString, date, title) {
-
             console.log("addpost beginning");
-
 
             //Init
             var transaction = data.transaction(["messages"], "readwrite");
@@ -565,29 +532,26 @@
             //Init and add post
             if (thread == "")
                 thread = "threadArea";
-            //else if (thread == "threadArea")
-            //    thread = title;
-            //else
-             //   thread = thread + title;
-
             console.log("set thread to: " + thread);
 
+            //If this is an edit
             if (editId != -1) {
-
+                //init
                 var transaction = data.transaction(["messages"], "readwrite");
                 var request = objectStore.get(editId);
                 request.onsuccess = function (event) {
-
+                    //update the message string
                     var post = request.result;
                     post.msgString = msgString
                     var newPost = [post];
+                    //reset the edit id now thsat the edit is finished
                     editId = -1;
 
+                    //attempt to update the database
                     var objectStoreRequest = objectStore.put(newPost[0]);
                     console.log("attepting to edit existing post");
 
-                    //objectStore.
-                    //Error handling dcc
+                    //Error handling
                     objectStoreRequest.onsuccess = function (event) {
                         console.log("Item edited. -> newPost id: " + newPost[0].id + " -> database size: " + messagesStoreSize);
                         messagesStoreSize++;
@@ -598,12 +562,9 @@
                     };
 
 
-                }
-            }
-            /*else if (replyTitle!="") {
-
-            }*/
-            else {
+                }//End success
+            }//End if edit
+            else { //a regular, new post
                 var newPost = [{
                     id: messagesStoreSize,
                     userName: userName,
@@ -612,10 +573,10 @@
                     thread: thread,
                     title: title
                 }];
+                //attempt to add it to the database
                 var objectStoreRequest = objectStore.put(newPost[0]);
                 console.log("attepting to add new post");
 
-                //objectStore.
                 //Error handling dcc
                 objectStoreRequest.onsuccess = function (event) {
                     console.log("Item added. -> newPost id: " + newPost[0].id + " -> database size: " + messagesStoreSize);
@@ -626,9 +587,11 @@
                     console.log("Item Not Added. Error: " + objectStoreRequest.error + " -> newPost id: " + newPost[0].id + " -> database size: " + messagesStoreSize);
                 };
             }
-
         }
 
+        //The post message button, takes the date, post title, and post text from ckeditor and acalls add with these
+        //inputs torequest them added
+        //Inputs and returns nothing
         function postMessageButton() {
             console.log("post message button pressed");
 
@@ -646,16 +609,10 @@
             addPost(("User: " + userLoggedIn), editorData, ("Date Posted: " + (mm + " / " + dd + " / " + yyyy)), $("#titleText").val());
 
 
-        }
+        }//End postMessageButton()
 
-        function editPost(ckeditorText) {
-
-            renderCkeditor(ckeditorText);
-            console.log("rendering ckeditor for edit");
-
-        }
-
-        //Deletes the most recent post
+        //Deletes the selected post
+        //Inputs the post id to find the post in the database
         function deletePost(postId) {
             //Delete post
             console.log("Delete")
@@ -673,226 +630,96 @@
                 console.log("error: " + request.error);
             };
 
-        }
+        }//End delete()
 
         // Displays all current database entries in html
+        //inputs and returns nothing
         function displayPost() {
             //Display each message
             console.log("Displaying...");
-           // var request = window.indexedDB.open("messages", 1);
-            //request.onsuccess = function (event) {
+            //Init
+            var transaction = data.transaction(["messages"]);
+            var objectStore = transaction.objectStore("messages");
+            //Remove all content to post it with changes
+            $("#threadArea").empty();
+            objectStore.openCursor().onsuccess = function (event) {
 
-                //Init
-                var transaction = data.transaction(["messages"]);
-                var objectStore = transaction.objectStore("messages");
-                //Remove all content to post it with changes
-                $("#threadArea").empty();
-                objectStore.openCursor().onsuccess = function (event) {
+                //Use cursor to cycle all entries, displaying each one in a lisr
+                var cursor = event.target.result;
+                if (cursor) {
+                    console.log("cursor active..." + cursor.value.id + "getting thread: " + cursor.value.thread + "and creating element: " + cursor.value.thread + cursor.value.title);
 
-                    //Use cursor to cycle all entries, displaying each one in a lisr
-                    var cursor = event.target.result;
-                    if (cursor) {
-                        console.log("cursor active..." + cursor.value.id + "getting thread: " + cursor.value.thread + "and creating element: " + cursor.value.thread +cursor.value.title);
+                    //Create a new element to keep posts displayed in the correct order
+                    var listItem = document.createElement(cursor.value.thread + cursor.value.title);
+                    listItem.setAttribute("id", cursor.value.thread + cursor.value.title);
+                    //Set the innerHTML of this new element. this is the post and all of its buttons
+                    listItem.innerHTML =
+                        cursor.value.userName
+                        + "<br>"
+                        + cursor.value.title
+                        + "<br>"
+                        + cursor.value.msgString
+                        + "<br>"
+                        + cursor.value.date
+                        + "<br>"
+                        + "<button type = 'button' onclick = 'openEdit("
+                        + cursor.value.id + ",&quot;" + cursor.value.msgString + "&quot;"
+                        + ") ' class='btn btn-info btn-lg' data-toggle='modal' data-target='#ckModal' > Edit Post</button >"
+                        + "<button type = 'button' onclick = 'openReply("
+                        + cursor.value.id + ",&quot;" + cursor.value.msgString + "&quot;,&quot;" + cursor.value.title + "&quot;"
+                        + ") ' class='btn btn-info btn-lg' data-toggle='modal' data-target='#ckModal' > Reply</button >"
+                        + "<button onclick='deletePost("
+                        + cursor.value.id
+                        + ") ' class='btn btn-info btn-lg'>Delete Post</button>"
+                        + "<button onclick='initCascadePosts(&quot;"
+                        + cursor.value.thread + "&quot;,&quot;" + cursor.value.title + "&quot;"
+                        + ") ' class='btn btn-info btn-lg'>Collapse thread</button>"
+                        + "<br><br>";
+                    //add these appendages to the html and continue to the next
+                    $("#" + cursor.value.thread).append(listItem);
+                    cursor.continue();
+                } else {
+                    //all posts displayed. reset the thread variable to show that the next post starts at the top of the threadArea element.
+                    console.log('all Entries displayed.');
+                    thread = "threadArea";
 
-                        var listItem = document.createElement(cursor.value.thread + cursor.value.title);
-                        listItem.setAttribute("id", cursor.value.thread + cursor.value.title);
-                        //This is our post, passing the post to the delete button for each post
-                        listItem.innerHTML =
-                            cursor.value.userName
-                            + "<br>"
-                            + cursor.value.thread + "/" + cursor.value.title
-                            + "<br>"
-                            + cursor.value.msgString
-                            + "<br>"
-                            + cursor.value.date
-                            + "<br>"
-                            + "<button type = 'button' onclick = 'openEdit("
-                            + cursor.value.id + ",&quot;" + cursor.value.msgString + "&quot;,&quot;" + cursor.value.title +"&quot;"
-                            + ") ' class='btn btn-info btn-lg' data-toggle='modal' data-target='#ckModal' > Edit Post</button >"
-                            + "<button type = 'button' onclick = 'openReply("
-                            + cursor.value.id + ",&quot;" + cursor.value.msgString + "&quot;,&quot;" + cursor.value.title +"&quot;"
-                            + ") ' class='btn btn-info btn-lg' data-toggle='modal' data-target='#ckModal' > Reply</button >"
-                            + "<button onclick='deletePost("
-                            + cursor.value.id
-                            + ") ' class='btn btn-info btn-lg'>Delete Post</button>"
-                            + "<button onclick='expandPost(&quot;"
-                            + cursor.value.thread + "&quot;,&quot;" + cursor.value.title + "&quot;"
-                            + ") ' class='btn btn-info btn-lg'>Collapse thread</button>"
-                            + "<br><br>";
-                        //add these appendages to the html
-                        $("#" + cursor.value.thread).append(listItem);
-                        //initCascadePosts(cursor.value.tread);
-                        cursor.continue();
-                    } else {
-                        console.log('all Entries displayed.');
-                        thread = "threadArea";
+                }
+            };
+            // }
 
-                    }
-                };
-           // }
-            
-        }
+        }//End displayPosts()
 
+        //Collapses the thread into a single button for expansion
+        //inputs the post thread and title to find them in html for disabling
         function initCascadePosts(postThread, postTitle) {
-            //var acc = document.getElementById(postThread+postTitle);
-            /*var ids = $('#' + postThread + postTitle).map(function () {
-                return $(this).attr('id');
-            }).get();*/
-            //for (var i = 0; i < acc.length; i++) {
-                //acc[i].addEventListener("click", function () {
-            //acc.classList.toggle("active");
-            //var panels = acc.children;
-            //for (var i = 0; i < panels.length; i++) {
-            //ids = $('#' + ).children().get();
-            //for (var i = 0; i < ids.length; i++) {
+            //append th new button
             $("#messages").append(
                 "<button onclick = 'toggleElement(&quot;"
                 + postThread + "&quot;+&quot;" + postTitle + "&quot;"
                 + ") ' class='btn btn-info btn-lg' onclick = function() { this.parentNode.removeChild(this)}>Expand thread: "
                 + postTitle + " </button > "
             );
+            //toggle the elements to make them collapsed
             toggleElement(postThread + postTitle);
-            //    //});
-            //}
-        }// End cascadePosts
+        }// End initCascadePosts()
 
+        //Toggles an element on or off, used for the SPA functionality.
         function toggleElement(elementName) {
+            //Find the element
             var targetElement = document.getElementById(elementName);
+            //Toggle it on/off
             if (targetElement.style.display === "none") {
                 targetElement.style.display = "block";
             } else {
                 targetElement.style.display = "none";
             }
         }
-        /*broken
-        $(function () {
-            /*
-            checkboxes.click(function () {
-                // The checkboxes in our app serve the purpose of filters.
-                // Here on every click we add or remove filtering criteria from a filters object.
-
-                // Then we call this function which writes the filtering criteria in the url hash.
-                createQueryHash(filters);
-            });*/
-            /*
-            $.getJSON("products.json", function (data) {
-                // Get data about our products from products.json.
-
-                // Call a function that will turn that data into HTML.
-                generateAllProductsHTML(data);
-
-                // Manually trigger a hashchange to start the app.
-                $(window).trigger('hashchange');
-            });*/
-
-            /*$(window).on('hashchange', function () {
-                // On every hash change the render function is called with the new hash.
-                // This is how the navigation of our app happens.
-                render(decodeURI(window.location.hash));
-            });
-
-            // This function decides what type of page to show
-            // depending on the current url hash value.
-            function render(url) {
-
-                // Get the keyword from the url.
-                var temp = url.split('/')[0];
-
-                // Hide whatever page is currently shown.
-                $('.main-content .page').removeClass('visible');
-
-                var map = {
-
-                    // The Homepage.
-                    '': function () {
-
-                        // Clear the filters object, uncheck all checkboxes, show all the products
-                        //filters = {};
-                        //checkboxes.prop('checked', false);
-
-                        renderThreads();
-                    },
-
-                    // Single Products page.
-                    '#editor': function () {
-
-                        // Get the index of which product we want to show and call the appropriate function.
-                        var index = url.split('#editor/')[1].trim();
-
-                        renderCkeditor();
-                    },
-                    /*
-                    // Page with filtered products
-                    '#filter': function () {
-
-                        // Grab the string after the '#filter/' keyword. Call the filtering function.
-                        url = url.split('#filter/')[1].trim();
-
-                        // Try and parse the filters object from the query string.
-                        try {
-                            filters = JSON.parse(url);
-                        }
-                        // If it isn't a valid json, go back to homepage ( the rest of the code won't be executed ).
-                        catch (err) {
-                            window.location.hash = '#';
-                        }
-
-                        renderFilterResults(filters, products);
-                    }*/
-
-               /* };
-
-                // Execute the needed function depending on the url keyword (stored in temp).
-                if (map[temp]) {
-                    map[temp]();
-                }
-                // If the keyword isn't listed in the above - render the error page.
-                else {
-                    renderErrorPage();
-                }
-
-            }
-            function renderThreads() {
-
-                var page = $('.threads'),
-                    container = $('.ckcontent');
-                page.addClass('visible');
-
-            }
-
-            function renderCkeditor(ckeditorText) {
-
-                var page = $('.editor'),
-                    container = $('.ckcontent');
-                /*
-                // Find the wanted product by iterating the data object and searching for the chosen index.
-                if (data.length) {
-                    data.forEach(function (item) {
-                        if (item.id == index) {
-                            // Populate '.preview-large' with the chosen product's data.
-                            container.find('h3').text(item.name);
-                            container.find('img').attr('src', item.image.large);
-                            container.find('p').text(item.description);
-                        }
-                    });
-                }
-                
-                // Show the page.
-                if (ckeditorText!="")
-                    container.append(ckeditorText);
-                else
-                    container.append(ckeditorDefaultText);
-
-                page.addClass('visible');
-
-            }
-
-            function renderErrorPage() {
-                var page = $('.error');
-                page.addClass('visible');
-            }
-        });*/
     </script> <!--End Script-->
 </body>
 </html>
 
+<!--Thank you for allowing me to present this project to you. 
+    I hope you will consider me for your amazing team, and allow me to expand on these skills. 
+    I've learned all of this in the timeframe of this project, and know I've only scratched the surface. 
+    
+    -Allen Jones-->
