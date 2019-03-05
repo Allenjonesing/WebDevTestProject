@@ -273,6 +273,7 @@
         var usersStoreSize = 0;
         var messagesStoreSize = 0;
         var editId = -1;
+        var replyTitle = "threadArea";
         console.log("Database init started");
         //usersStoreSize = 0;
         //error handling
@@ -506,11 +507,20 @@
             displayPost();
 
         }
-        function openCkeditor(postId) {
+        function openEdit(postId, postMsgString, postTitle) {
             //pass username data along
             console.log("opening ckeditor");
             editId = postId;
-            renderCkeditor("");
+            replyTitle = postTitle;
+            renderCkeditor(postMsgString);
+
+        }
+        function openReply(postId, postMsgString, postTitle) {
+            //pass username data along
+            console.log("opening ckeditor");
+            //editId = postId;
+            thread = thread+postTitle;
+            renderCkeditor(postMsgString);
 
         }
 
@@ -550,38 +560,16 @@
 
             //Init and add post
             if (thread == "")
-                thread = "Master";
-            else if (thread == "Master")
-                thread = title;
-            else
-                thread = thread + "-" + title;
+                thread = "threadArea";
+            //else if (thread == "threadArea")
+            //    thread = title;
+            //else
+             //   thread = thread + title;
 
             console.log("set thread to: " + thread);
 
-            if (editId == -1) {
-                var newPost = [{
-                    id: messagesStoreSize,
-                    userName: userName,
-                    msgString: msgString,
-                    date: date,
-                    thread: thread,
-                    title: title
-                }];
-                var objectStoreRequest = objectStore.put(newPost[0]);
-                console.log("attepting to add new post");
+            if (editId != -1) {
 
-                //objectStore.
-                //Error handling dcc
-                objectStoreRequest.onsuccess = function (event) {
-                    console.log("Item added. -> newPost id: " + newPost[0].id + " -> database size: " + messagesStoreSize);
-                    messagesStoreSize++;
-                    displayPost();
-                };
-                objectStoreRequest.onerror = function (event) {
-                    console.log("Item Not Added. Error: " + objectStoreRequest.error + " -> newPost id: " + newPost[0].id + " -> database size: " + messagesStoreSize);
-                };
-            }
-            else {
                 var transaction = data.transaction(["messages"], "readwrite");
                 var request = objectStore.get(editId);
                 request.onsuccess = function (event) {
@@ -605,7 +593,34 @@
                         console.log("Item Not edited. Error: " + objectStoreRequest.error + " -> newPost id: " + newPost[0].id + " -> database size: " + messagesStoreSize);
                     };
 
+
                 }
+            }
+            /*else if (replyTitle!="") {
+
+            }*/
+            else {
+                var newPost = [{
+                    id: messagesStoreSize,
+                    userName: userName,
+                    msgString: msgString,
+                    date: date,
+                    thread: thread,
+                    title: title
+                }];
+                var objectStoreRequest = objectStore.put(newPost[0]);
+                console.log("attepting to add new post");
+
+                //objectStore.
+                //Error handling dcc
+                objectStoreRequest.onsuccess = function (event) {
+                    console.log("Item added. -> newPost id: " + newPost[0].id + " -> database size: " + messagesStoreSize);
+                    messagesStoreSize++;
+                    displayPost();
+                };
+                objectStoreRequest.onerror = function (event) {
+                    console.log("Item Not Added. Error: " + objectStoreRequest.error + " -> newPost id: " + newPost[0].id + " -> database size: " + messagesStoreSize);
+                };
             }
 
         }
@@ -673,9 +688,10 @@
                     //Use cursor to cycle all entries, displaying each one in a lisr
                     var cursor = event.target.result;
                     if (cursor) {
-                        console.log("cursor active..." + cursor.value.id);
+                        console.log("cursor active..." + cursor.value.id + "getting thread: " + cursor.value.thread + "and creating element: " + cursor.value.thread +cursor.value.title);
 
-                        var listItem = document.createElement("li");
+                        var listItem = document.createElement(cursor.value.thread + cursor.value.title);
+                        listItem.setAttribute("id", cursor.value.thread + cursor.value.title);
                         //This is our post, passing the post to the delete button for each post
                         listItem.innerHTML =
                             cursor.value.userName
@@ -686,15 +702,18 @@
                             + "<br>"
                             + cursor.value.date
                             + "<br>"
-                            + "<button type = 'button' onclick = 'openCkeditor("
-                            + cursor.value.id
+                            + "<button type = 'button' onclick = 'openEdit("
+                        + cursor.value.id + ",&quot;" + cursor.value.msgString + "&quot;,&quot;" + cursor.value.title +"&quot;"
                             + ") ' class='btn btn-info btn-lg' data-toggle='modal' data-target='#ckModal' > Edit Post</button >"
+                            + "<button type = 'button' onclick = 'openReply("
+                            + cursor.value.id + ",&quot;" + cursor.value.msgString + "&quot;,&quot;" + cursor.value.title +"&quot;"
+                            + ") ' class='btn btn-info btn-lg' data-toggle='modal' data-target='#ckModal' > Reply</button >"
                             + "<button onclick='deletePost("
                             + cursor.value.id
                             + ") ' >Delete Post</button>"
                             + "<br><br>";
                         //add these appendages to the html
-                        $("#threadArea").append(listItem);
+                        $("#"+cursor.value.thread).append(listItem);
                         cursor.continue();
                     } else {
                         console.log('all Entries displayed.');
