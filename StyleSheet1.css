@@ -1,8 +1,4 @@
-﻿.btn {
-    margin: 15px 0;
-}
-
-#loadingImg {
+﻿#loadingImg {
     display: none;
     position: absolute;
     margin: auto;
@@ -26,6 +22,10 @@
     padding-right: 10px;
 }
 
+.post div{
+    float: left;
+    padding-right: 10px;
+}
 ::-webkit-input-placeholder {
     color: #ccc;
 }
