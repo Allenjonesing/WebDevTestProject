@@ -236,7 +236,7 @@
             <h1>Welcome! Please, create a thread.</h1>
             <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#ckModal">Start Thread</button>
 
-            <div class="messages">
+            <div id="messages">
 
                 <div class="container">
                     <div class="card">
@@ -268,7 +268,7 @@
         var database = [];
         var data;
         var request = window.indexedDB.open("database1", 1);
-        var thread = "";
+        //var thread = "";
         var userLoggedIn = "";
         var usersStoreSize = 0;
         var messagesStoreSize = 0;
@@ -532,6 +532,10 @@
             //$("#editor1").append(ckeditorText);
         }
 
+        function expandPost(postThread, postTitle) {
+            initCascadePosts(postThread, postTitle);
+        }
+
         //Add: adds a postMessageButton to database. take sin username, ckeditor data, and date
         function addPost(userName, msgString, date, title) {
 
@@ -703,41 +707,53 @@
                             + cursor.value.date
                             + "<br>"
                             + "<button type = 'button' onclick = 'openEdit("
-                        + cursor.value.id + ",&quot;" + cursor.value.msgString + "&quot;,&quot;" + cursor.value.title +"&quot;"
+                            + cursor.value.id + ",&quot;" + cursor.value.msgString + "&quot;,&quot;" + cursor.value.title +"&quot;"
                             + ") ' class='btn btn-info btn-lg' data-toggle='modal' data-target='#ckModal' > Edit Post</button >"
                             + "<button type = 'button' onclick = 'openReply("
                             + cursor.value.id + ",&quot;" + cursor.value.msgString + "&quot;,&quot;" + cursor.value.title +"&quot;"
                             + ") ' class='btn btn-info btn-lg' data-toggle='modal' data-target='#ckModal' > Reply</button >"
                             + "<button onclick='deletePost("
                             + cursor.value.id
-                            + ") ' >Delete Post</button>"
+                            + ") ' class='btn btn-info btn-lg'>Delete Post</button>"
+                            + "<button onclick='expandPost(&quot;"
+                            + cursor.value.thread + "&quot;,&quot;" + cursor.value.title + "&quot;"
+                            + ") ' class='btn btn-info btn-lg'>Collapse thread</button>"
                             + "<br><br>";
                         //add these appendages to the html
-                        $("#"+cursor.value.thread).append(listItem);
+                        $("#" + cursor.value.thread).append(listItem);
+                        //initCascadePosts(cursor.value.tread);
                         cursor.continue();
                     } else {
                         console.log('all Entries displayed.');
+                        thread = "threadArea";
+
                     }
                 };
            // }
+            
         }
 
-        function initCascadePosts() {
-            var acc = document.getElementsByClassName("Master");
-
-            for (var i = 0; i < acc.length; i++) {
-                acc[i].addEventListener("click", function () {
-                    this.classList.toggle("active");
-                    var panels = this.children;
-                    for (var i = 0; i < acc.length; i++) {
-                        if (panel[i].style.maxHeight) {
-                            panel[i].style.maxHeight = null;
-                        } else {
-                            panel[i].style.maxHeight = (panel[i].scrollHeight + "px") * i;
-                        }
-                    }
-                });
-            }
+        function initCascadePosts(postThread, postTitle) {
+            //var acc = document.getElementById(postThread+postTitle);
+            /*var ids = $('#' + postThread + postTitle).map(function () {
+                return $(this).attr('id');
+            }).get();*/
+            //for (var i = 0; i < acc.length; i++) {
+                //acc[i].addEventListener("click", function () {
+            //acc.classList.toggle("active");
+            //var panels = acc.children;
+            //for (var i = 0; i < panels.length; i++) {
+            //ids = $('#' + ).children().get();
+            //for (var i = 0; i < ids.length; i++) {
+            $("#messages").append(
+                "<button onclick = 'toggleElement(&quot;"
+                + postThread + "&quot;+&quot;" + postTitle + "&quot;"
+                + ") ' class='btn btn-info btn-lg' onclick = function() { this.parentNode.removeChild(this)}>Expand thread: "
+                + postTitle + " </button > "
+            );
+            toggleElement(postThread + postTitle);
+            //    //});
+            //}
         }// End cascadePosts
 
         function toggleElement(elementName) {
