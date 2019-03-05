@@ -8,6 +8,8 @@ SPA for Web Developer Testing Project.
     The database is persistant through browser close. No accounts exist at first
     Messages are displayed through html appendages, and removed and re-appended
     during each visit, post, and deletion.
+    
+    Tesing has only been done on Google Chrome. 
 
     html head:
         Resources
